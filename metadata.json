@@ -1,0 +1,6 @@
+{
+  "name": "TECUMP - TUMCU Management Platform",
+  "description": "TUMCU Enterprise Christian Union Management Platform with executive workflows, constitutional ministries, committees, RBAC, events, and membership management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

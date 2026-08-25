@@ -1,0 +1,104 @@
+import { useMemo } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ArrowLeft, CalendarDays, CheckCircle2, Church, Clock3, LogIn, Users, UserPlus, UserMinus, Sparkles } from 'lucide-react';
+import { Card } from '@/components/Card';
+import { Button } from '@/components/Button';
+import { useAuthStore } from '@/store/auth.store';
+import { fetchMyMembershipStatus } from '@/features/membership/membership.api';
+import { fetchMinistryDetails, fetchMyMinistryMembership, joinMinistry, leaveMinistry } from '@/features/ministries/ministries.api';
+
+const FALLBACK: Record<string, { focus: string; blurb: string }> = {
+  intercessory: { focus: 'Prayer & spiritual growth', blurb: 'A place to pray, intercede and strengthen the spiritual life of the Union.' },
+  worship: { focus: 'Praise & worship', blurb: 'Serving through music and creating spaces for people to encounter God.' },
+  media: { focus: 'Media & storytelling', blurb: 'Telling the TUMCU story through photography, video, design, livestream and digital communication.' },
+  brothers: { focus: 'Brotherhood & growth', blurb: 'Building Christ-centred brotherhood through fellowship, mentorship and accountability.' },
+  sisters: { focus: 'Sisterhood & growth', blurb: 'Building a caring sisterhood through fellowship, mentorship, prayer and practical support.' },
+};
+
+export function MinistryDetailsPage() {
+  const { id = '' } = useParams();
+  const { isAuthenticated } = useAuthStore();
+  const queryClient = useQueryClient();
+  const { data, isLoading, isError } = useQuery({ queryKey: ['ministry', id], queryFn: () => fetchMinistryDetails(id), enabled: !!id });
+  const { data: membership } = useQuery({
+    queryKey: ['membership', 'me'], queryFn: fetchMyMembershipStatus,
+    enabled: isAuthenticated,
+  });
+  const { data: ministryMembership } = useQuery({
+    queryKey: ['ministry-membership', id], queryFn: () => fetchMyMinistryMembership(id), enabled: isAuthenticated && !!id,
+  });
+  const activeMember = useMemo(() => membership?.memberships.some((m) => m.status === 'active') ?? false, [membership]);
+
+  const joinMutation = useMutation({
+    mutationFn: () => joinMinistry(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['ministry-membership', id] }),
+  });
+  const leaveMutation = useMutation({
+    mutationFn: () => leaveMinistry(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['ministry-membership', id] }),
+  });
+
+  if (isLoading) return <div className="page-shell section-pad"><Card variant="glass" className="animate-pulse"><div className="h-10 w-2/3 rounded bg-slate-200"/><div className="mt-4 h-5 w-full rounded bg-slate-100"/><div className="mt-2 h-5 w-5/6 rounded bg-slate-100"/></Card></div>;
+  if (isError || !data) return <div className="page-shell section-pad"><Card variant="glass" className="text-center"><Church className="mx-auto text-slate-300"/><h1 className="mt-3 text-xl font-black text-primary-950">Ministry unavailable</h1><p className="mt-2 text-sm text-slate-500">We could not load this ministry. Please try again.</p><Link to="/ministries" className="mt-5 inline-flex text-sm font-bold text-primary-700">Back to ministries</Link></Card></div>;
+
+  const { ministry, stats, trainings } = data;
+  const fallback = FALLBACK[ministry.code] ?? { focus: 'Service & community', blurb: 'A place to serve, connect and grow in Christ-centred community.' };
+  const isLeader = ministryMembership?.position === 'leader' || ministryMembership?.position === 'deputy_leader';
+
+  const connectionContent = !isAuthenticated ? (
+    <>
+      <p className="mt-3 text-sm leading-6 text-slate-600">Sign in as an admitted member to connect with this ministry.</p>
+      <Link to="/login" className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary-900 px-4 py-3 text-sm font-bold text-white"><LogIn size={16}/> Sign in</Link>
+    </>
+  ) : !activeMember ? (
+    <div className="mt-4 rounded-2xl bg-amber-50/80 p-4"><p className="font-bold text-primary-900">Membership approval required</p><p className="mt-1 text-xs leading-5 text-slate-500">Your account must be an active admitted member before you can join a ministry.</p></div>
+  ) : ministryMembership ? (
+    <>
+      <div className="mt-4 flex items-center gap-3 rounded-2xl bg-primary-50/80 p-4"><CheckCircle2 className="text-primary-700"/><div><p className="font-black text-primary-950">You are connected</p><p className="text-xs capitalize text-slate-500">{ministryMembership.position.replace('_', ' ')}</p></div></div>
+      {!isLeader && <Button variant="ghost" className="mt-4 w-full text-red-600" loading={leaveMutation.isPending} onClick={() => leaveMutation.mutate()}><UserMinus size={16}/> Leave ministry</Button>}
+    </>
+  ) : (
+    <>
+      <p className="mt-3 text-sm leading-6 text-slate-600">You are an admitted member. Connect with this ministry to receive its opportunities and take part in its activities.</p>
+      <Button className="mt-5 w-full" loading={joinMutation.isPending} onClick={() => joinMutation.mutate()}><UserPlus size={16}/> Join this ministry</Button>
+    </>
+  );
+
+  return <div className="overflow-hidden">
+    <section className="mesh-hero-bg px-5 pb-16 pt-8 sm:px-6 lg:pb-20 lg:pt-12">
+      <div className="page-shell">
+        <Link to="/ministries" className="inline-flex items-center gap-2 text-sm font-bold text-primary-700 hover:text-primary-500"><ArrowLeft size={16}/> All ministries</Link>
+        <div className="mt-8 grid gap-8 lg:grid-cols-[1.2fr_.8fr] lg:items-end">
+          <div>
+            <span className="eyebrow"><Sparkles size={14}/> {fallback.focus}</span>
+            <h1 className="mt-5 text-4xl font-black tracking-tight text-primary-950 sm:text-6xl">{ministry.name}</h1>
+            <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600">{ministry.description || fallback.blurb}</p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <div className="surface-glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-primary-800"><Users size={16}/> {stats.activeMembers} active member{stats.activeMembers === 1 ? '' : 's'}</div>
+              <div className="surface-glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-primary-800"><Church size={16}/> TUMCU ministry</div>
+            </div>
+          </div>
+          <Card variant="glass" className="p-6">
+            <p className="text-xs font-black uppercase tracking-[.18em] text-gold-600">Your connection</p>
+            {connectionContent}
+          </Card>
+        </div>
+      </div>
+    </section>
+
+    <section className="page-shell section-pad">
+      <div className="grid gap-6 lg:grid-cols-[1.1fr_.9fr]">
+        <Card variant="glass">
+          <div className="flex items-center gap-3"><span className="grid h-11 w-11 place-items-center rounded-2xl bg-primary-50 text-primary-700"><Users size={19}/></span><div><h2 className="font-black text-primary-950">How to get involved</h2><p className="text-xs text-slate-500">Grow through consistent service</p></div></div>
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">{['Connect with the team','Attend ministry activities','Serve with your gifts'].map((x, i) => <div key={x} className="rounded-2xl border border-white/70 bg-white/55 p-4"><div className="text-xs font-black text-gold-600">0{i+1}</div><p className="mt-2 text-sm font-bold text-primary-900">{x}</p></div>)}</div>
+        </Card>
+        <Card variant="glass">
+          <div className="flex items-center gap-3"><span className="grid h-11 w-11 place-items-center rounded-2xl bg-gold-50 text-gold-700"><Clock3 size={19}/></span><div><h2 className="font-black text-primary-950">Training & growth</h2><p className="text-xs text-slate-500">Ministry development</p></div></div>
+          <div className="mt-5 space-y-3">{trainings.length ? trainings.map((training) => <div key={training.id} className="rounded-2xl bg-white/55 p-4"><div className="flex items-start justify-between gap-3"><p className="font-bold text-primary-900">{training.title}</p><span className="text-xs text-slate-400">{new Date(training.training_date).toLocaleDateString('en-KE')}</span></div>{training.facilitator && <p className="mt-1 text-xs text-slate-500">Facilitator: {training.facilitator}</p>}</div>) : <p className="rounded-2xl bg-slate-50/70 p-4 text-sm text-slate-500">No upcoming training has been published yet.</p>}</div>
+        </Card>
+      </div>
+      <Card variant="glass" className="mt-6"><div className="flex items-center gap-3"><CalendarDays className="text-primary-700"/><div><h2 className="font-black text-primary-950">Your ministry journey</h2><p className="text-sm text-slate-500">Connected members can access ministry-specific activities as those features are published.</p></div></div></Card>
+    </section>
+  </div>;
+}
