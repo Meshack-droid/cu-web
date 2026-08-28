@@ -1,15 +1,11 @@
 import express from 'express';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { createServer as createViteServer } from 'vite';
 import { createApp } from './backend/src/app';
 import { env } from './backend/src/config/env';
 import { logger } from './backend/src/utils/logger';
 import { checkDatabaseConnection } from './backend/src/config/database';
 import { startNotificationDispatcher } from './backend/src/modules/notifications/services/notification-dispatch.service';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 async function startServer() {
   // Create Express app with all API routes and middleware
@@ -28,7 +24,7 @@ async function startServer() {
   } else {
     const distPath = path.resolve(process.cwd(), 'dist');
     app.use(express.static(distPath));
-    app.get('*', (req, res) => {
+    app.get('*', (_req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }

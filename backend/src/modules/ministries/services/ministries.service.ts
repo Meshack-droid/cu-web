@@ -10,15 +10,25 @@ export class MinistriesService extends BaseService<Ministries> {
   }
 
   async getDetails(id: string) {
-    const ministry = await this.repository.findById(id);
+    const ministry = await this.repository.findByIdOrCode(id);
+    const ministryId = ministry.id;
     const [memberRows, trainingRows] = await Promise.all([
       query<{ total: number }[]>(
-        `SELECT COUNT(*) AS total\n           FROM ministry_members mm\n           JOIN memberships m ON m.user_id = mm.user_id\n          WHERE mm.ministry_id = :ministryId\n            AND (mm.end_date IS NULL OR mm.end_date >= CURDATE())\n            AND m.status = 'active'`,
-        { ministryId: id }
+        `SELECT COUNT(*) AS total
+           FROM ministry_members mm
+           JOIN memberships m ON m.user_id = mm.user_id
+          WHERE mm.ministry_id = :ministryId
+            AND (mm.end_date IS NULL OR mm.end_date >= CURDATE())
+            AND m.status = 'active'`,
+        { ministryId }
       ),
       query<{ id: string; title: string; training_date: string; facilitator: string | null; notes: string | null }[]>(
-        `SELECT id, title, training_date, facilitator, notes\n           FROM ministry_trainings\n          WHERE ministry_id = :ministryId\n          ORDER BY training_date DESC\n          LIMIT 6`,
-        { ministryId: id }
+        `SELECT id, title, training_date, facilitator, notes
+           FROM ministry_trainings
+          WHERE ministry_id = :ministryId
+          ORDER BY training_date DESC
+          LIMIT 6`,
+        { ministryId }
       ),
     ]);
 

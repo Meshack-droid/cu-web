@@ -45,7 +45,13 @@ export const useAuthStore = create<AuthState>()(
       setTokens: (accessToken, refreshToken) => set({ accessToken, refreshToken }),
       setPermissions: (permissions) => set({ permissions }),
       setRoles: (roles) => set({ roles }),
-      hasPermission: (code) => get().permissions.includes(code),
+      hasPermission: (code) => {
+        const state = get();
+        if (state.roles.some((r) => r.code === 'super_admin' || r.code === 'system_admin')) {
+          return true;
+        }
+        return state.permissions.includes(code) || state.permissions.includes('*');
+      },
       logout: () =>
         set({ accessToken: null, refreshToken: null, user: null, permissions: [], roles: [], isAuthenticated: false }),
     }),

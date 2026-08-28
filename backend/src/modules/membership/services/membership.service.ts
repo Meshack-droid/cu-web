@@ -174,4 +174,129 @@ export class MembershipService {
   listMemberships(filters: Record<string, unknown> = {}, page = 1, pageSize = 20) {
     return this.memberships.findAll(filters, { page, pageSize });
   }
+
+  async listAllMembersWithDetails(search?: string, yearOfStudy?: string, department?: string, status?: string) {
+    const [userRows] = await pool.query('SELECT * FROM users');
+    const [membershipRows] = await pool.query('SELECT * FROM memberships');
+    const [roles] = await pool.query('SELECT * FROM user_roles');
+    const [roleList] = await pool.query('SELECT * FROM roles');
+    const [minMembers] = await pool.query('SELECT * FROM ministry_members');
+    const [ministries] = await pool.query('SELECT * FROM ministries');
+
+    const users = (userRows as any[]) || [];
+    const memberships = (membershipRows as any[]) || [];
+    const userRoles = (roles as any[]) || [];
+    const allRoles = (roleList as any[]) || [];
+    const ministryMembers = (minMembers as any[]) || [];
+    const allMinistries = (ministries as any[]) || [];
+
+    let result = users.map((u) => {
+      const mem = memberships.find((m) => m.user_id === u.id) || null;
+      const uRole = userRoles.find((ur) => ur.user_id === u.id);
+      const roleObj = uRole ? allRoles.find((r) => r.id === uRole.role_id) : null;
+      const userMins = ministryMembers
+        .filter((mm) => mm.user_id === u.id)
+        .map((mm) => {
+          const m = allMinistries.find((min) => min.id === mm.ministry_id);
+          return m ? m.name : 'Ministry Member';
+        });
+
+      return {
+        id: mem?.id || u.id,
+        user_id: u.id,
+        full_name: u.full_name,
+        email: u.email,
+        phone_number: u.phone_number || 'N/A',
+        admission_number: u.admission_number || 'N/A',
+        year_of_study: typeof u.year_of_study === 'number' ? `Year ${u.year_of_study}` : String(u.year_of_study || 'Year 1'),
+        department: u.department || u.school || 'School of Computing and Informatics',
+        membership_number: mem?.membership_number || `TUMCU/${new Date().getFullYear()}/${u.admission_number?.slice(-3) || '101'}`,
+        membership_type: mem?.membership_type_id === 'mt-special' ? 'Special Member' : 'Full Member',
+        status: mem?.status || u.account_status || 'active',
+        registration_date: mem?.registration_date || u.created_at,
+        role_name: roleObj?.name || 'Member',
+        ministries: userMins.length > 0 ? userMins.join(', ') : 'None',
+      };
+    });
+
+    if (search) {
+      const q = search.toLowerCase();
+      result = result.filter(
+        (m) =>
+          String(m.full_name || '').toLowerCase().includes(q) ||
+          String(m.email || '').toLowerCase().includes(q) ||
+          String(m.admission_number || '').toLowerCase().includes(q) ||
+          String(m.membership_number || '').toLowerCase().includes(q)
+      );
+    }
+    if (yearOfStudy && yearOfStudy !== 'all') {
+      result = result.filter((m) => String(m.year_of_study || '').toLowerCase().includes(yearOfStudy.toLowerCase()));
+    }
+    if (department && department !== 'all') {
+      result = result.filter((m) => String(m.department || '').toLowerCase().includes(department.toLowerCase()));
+    }
+    if (status && status !== 'all') {
+      result = result.filter((m) => m.status === status);
+    }
+
+    // Sort by year of study then name
+    result.sort((a, b) => String(a.year_of_study).localeCompare(String(b.year_of_study)) || String(a.full_name).localeCompare(String(b.full_name)));
+
+    return result;
+  }
+
+  async deleteMember(memberIdOrUserId: string) {
+    const [userRows] = await pool.query('SELECT * FROM users');
+    const [membershipRows] = await pool.query('SELECT * FROM memberships');
+    const users = (userRows as any[]) || [];
+    const memberships = (membershipRows as any[]) || [];
+
+    const member = memberships.find((m) => m.id === memberIdOrUserId || m.user_id === memberIdOrUserId);
+    const userId = member ? member.user_id : memberIdOrUserId;
+
+    // Remove user and memberships from pool / in-memory store
+    await pool.query('DELETE FROM memberships WHERE id = :id', { id: member?.id || memberIdOrUserId });
+    await pool.query('DELETE FROM users WHERE id = :id', { id: userId });
+    await pool.query('DELETE FROM user_roles WHERE user_id = :id', { id: userId });
+    await pool.query('DELETE FROM ministry_members WHERE user_id = :id', { id: userId });
+
+    return { id: memberIdOrUserId, userId, deleted: true };
+  }
+
+  async exportMembersCsv() {
+    const members = await this.listAllMembersWithDetails();
+    const headers = [
+      'Membership No',
+      'Full Name',
+      'Admission No',
+      'Year of Study',
+      'Department / Faculty',
+      'Email',
+      'Phone Number',
+      'Role',
+      'Ministries',
+      'Status',
+      'Registered Date',
+    ];
+
+    const rows = members.map((m) => [
+      `"${m.membership_number}"`,
+      `"${m.full_name}"`,
+      `"${m.admission_number}"`,
+      `"${m.year_of_study}"`,
+      `"${m.department}"`,
+      `"${m.email}"`,
+      `"${m.phone_number}"`,
+      `"${m.role_name}"`,
+      `"${m.ministries}"`,
+      `"${m.status}"`,
+      `"${m.registration_date}"`,
+    ]);
+
+    const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    return {
+      filename: `TUMCU_Membership_Register_${new Date().toISOString().split('T')[0]}.csv`,
+      csv,
+    };
+  }
 }

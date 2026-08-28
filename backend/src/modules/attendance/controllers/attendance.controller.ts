@@ -4,7 +4,7 @@ import { AttendanceRecord } from '../interfaces/attendance.interface';
 import { AttendanceService } from '../services/attendance.service';
 import { sendSuccess } from '../../../utils/response';
 import { asyncHandler } from '../../../utils/asyncHandler';
-import { AuthenticationError } from '../../../utils/errors';
+import { AuthenticationError, BadRequestError, NotFoundError } from '../../../utils/errors';
 
 const service = new AttendanceService();
 
@@ -26,34 +26,148 @@ class AttendanceController extends BaseController<AttendanceRecord> {
     });
   });
 
-  // Self check-in: always records the CALLER's own attendance, never someone
-  // else's — same identity-enforcement pattern as meetings.controller.ts's
-  // create() (the caller can't spoof who they're marking present).
-  selfCheckIn = asyncHandler(async (req: Request, res: Response) => {
-    if (!req.user) throw new AuthenticationError();
-    const record = await service.recordAttendance({
-      attendableType: req.body.attendableType,
-      attendableId: req.body.attendableId,
-      userId: req.user.sub,
-      status: 'present',
-      method: 'self_check_in',
-      visitorType: 'none',
-    });
-    return sendSuccess(res, record, 'Attendance recorded', 201);
+  listSessions = asyncHandler(async (_req: Request, res: Response) => {
+    const sessions = await service.listSessions();
+    return sendSuccess(res, sessions, 'Attendance sessions retrieved');
   });
 
-  // Leader-recorded: for marking OTHER people present (e.g. a Ministry
-  // Secretary taking manual attendance for their session).
-  recordForOthers = asyncHandler(async (req: Request, res: Response) => {
-    const record = await service.recordAttendance({
-      attendableType: req.body.attendableType,
-      attendableId: req.body.attendableId,
-      userId: req.body.userId,
-      status: req.body.status ?? 'present',
-      method: 'leader_check_in',
-      visitorType: req.body.visitorType ?? 'none',
+  getActivePublicSessions = asyncHandler(async (_req: Request, res: Response) => {
+    const sessions = await service.listSessions();
+    const active = sessions.filter((s) => s.is_active);
+    return sendSuccess(res, active, 'Active attendance sessions');
+  });
+
+  getSession = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const session = await service.getSession(id);
+    if (!session) throw new NotFoundError('Attendance session not found');
+    return sendSuccess(res, session, 'Attendance session details');
+  });
+
+  createSession = asyncHandler(async (req: Request, res: Response) => {
+    const { title, session_type, session_date, start_time, end_time, venue, theme, preacher } = req.body;
+    if (!title || !session_date || !start_time || !venue) {
+      throw new BadRequestError('Title, date, start time, and venue are required');
+    }
+
+    const session = await service.createSession({
+      title,
+      session_type: session_type || 'sunday_service',
+      session_date,
+      start_time,
+      end_time,
+      venue,
+      theme,
+      preacher,
+      created_by: req.user?.sub,
     });
-    return sendSuccess(res, record, 'Attendance recorded', 201);
+
+    return sendSuccess(res, session, 'Attendance session and QR code generated successfully', 201);
+  });
+
+  updateSession = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    await service.updateSession(id, req.body);
+    const updated = await service.getSession(id);
+    return sendSuccess(res, updated, 'Session updated successfully');
+  });
+
+  getSessionRoster = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const roster = await service.getSessionRoster(id);
+    return sendSuccess(res, roster, 'Session attendance roster');
+  });
+
+  exportCsv = asyncHandler(async (req: Request, res: Response) => {
+    const sessionId = (req.params.id || req.query.sessionId || req.query.session_id) as string;
+    if (!sessionId) {
+      throw new BadRequestError('Session ID is required for export');
+    }
+
+    const { filename, csv } = await service.generateRosterCsv(sessionId);
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    return res.status(200).send(csv);
+  });
+
+  // Public/Guest check-in (scanned from QR code or direct link)
+  publicCheckIn = asyncHandler(async (req: Request, res: Response) => {
+    const {
+      sessionId,
+      sessionCode,
+      identifier,
+      fullName,
+      email,
+      phoneNumber,
+      category,
+      visitorType,
+      prayerRequest,
+      notes,
+    } = req.body;
+
+    let targetSessionId = sessionId;
+    if (!targetSessionId && sessionCode) {
+      const sess = await service.getSession(sessionCode);
+      if (sess) targetSessionId = sess.id;
+    }
+
+    if (!targetSessionId) {
+      throw new BadRequestError('Invalid or missing service session identifier');
+    }
+
+    // Check if caller is authenticated
+    const userId = req.user?.sub || null;
+
+    const result = await service.checkInMemberOrGuest({
+      sessionId: targetSessionId,
+      attendableType: 'sunday_service',
+      userId,
+      identifier,
+      fullName,
+      email,
+      phoneNumber,
+      category,
+      visitorType,
+      method: 'qr_code',
+      prayerRequest,
+      notes,
+    });
+
+    return sendSuccess(res, result, result.message, 200);
+  });
+
+  // Self check-in for authenticated members
+  selfCheckIn = asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) throw new AuthenticationError();
+    const targetSessionId = req.body.attendableId || req.body.sessionId;
+    const result = await service.checkInMemberOrGuest({
+      sessionId: targetSessionId,
+      attendableType: req.body.attendableType || 'sunday_service',
+      userId: req.user.sub,
+      method: req.body.method || 'self_check_in',
+      prayerRequest: req.body.prayerRequest,
+      notes: req.body.notes,
+    });
+    return sendSuccess(res, result, 'Attendance recorded successfully', 201);
+  });
+
+  // Leader-recorded: for marking someone present manually
+  recordForOthers = asyncHandler(async (req: Request, res: Response) => {
+    const targetSessionId = req.body.attendableId || req.body.sessionId;
+    const result = await service.checkInMemberOrGuest({
+      sessionId: targetSessionId,
+      attendableType: req.body.attendableType || 'sunday_service',
+      userId: req.body.userId || null,
+      fullName: req.body.fullName,
+      email: req.body.email,
+      phoneNumber: req.body.phoneNumber,
+      category: req.body.category,
+      visitorType: req.body.visitorType,
+      method: req.body.method || 'leader_check_in',
+      prayerRequest: req.body.prayerRequest,
+      notes: req.body.notes,
+    });
+    return sendSuccess(res, result, 'Attendance recorded', 201);
   });
 }
 

@@ -49,7 +49,7 @@ const DIRECTORY: Ministry[] = [
   ['ushering', 'Ushering Ministry'], ['catering', 'Catering Ministry'], ['media', 'Media Ministry'], ['creative', 'Creative Ministry'],
   ['technicians', 'Technicians Ministry'], ['high_school', 'High School Ministry'], ['hospital', 'Hospital Ministry'],
   ['brothers', "Brothers' Ministry"], ['sisters', "Sisters' Ministry"],
-].map(([code, name], index) => ({ id: `directory-${index}`, code, name, description: null, created_at: '' }));
+].map(([code, name], index) => ({ id: `min-${index + 1}`, code, name, description: null, created_at: '' }));
 
 function MinistryCardSkeleton() {
   return <Card variant="glass" className="overflow-hidden p-0 animate-pulse"><div className="h-52 bg-slate-200/70"/><div className="p-6"><div className="h-5 w-2/3 rounded bg-slate-200/70"/><div className="mt-3 h-3 w-full rounded bg-slate-100/80"/><div className="mt-2 h-3 w-5/6 rounded bg-slate-100/80"/></div></Card>;

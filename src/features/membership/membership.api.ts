@@ -70,3 +70,53 @@ export async function rejectApplication(applicationId: string, rejectionReason: 
   );
   return data.data;
 }
+
+export interface MemberListItem {
+  id: string;
+  user_id: string;
+  full_name: string;
+  email: string;
+  phone_number: string;
+  admission_number: string;
+  year_of_study: string;
+  department: string;
+  membership_number: string;
+  membership_type: string;
+  status: string;
+  registration_date: string;
+  role_name: string;
+  ministries: string;
+}
+
+export async function fetchAllMembers(filters?: {
+  search?: string;
+  yearOfStudy?: string;
+  department?: string;
+  status?: string;
+}): Promise<MemberListItem[]> {
+  const params: Record<string, string> = {};
+  if (filters?.search) params.search = filters.search;
+  if (filters?.yearOfStudy) params.year_of_study = filters.yearOfStudy;
+  if (filters?.department) params.department = filters.department;
+  if (filters?.status) params.status = filters.status;
+
+  const { data } = await api.get<ApiResponse<MemberListItem[]>>('/membership/all-members', { params });
+  return data.data;
+}
+
+export async function deleteMemberApi(memberId: string): Promise<void> {
+  await api.delete(`/membership/${memberId}`);
+}
+
+export async function downloadMembershipCsv(): Promise<void> {
+  const res = await api.get('/membership/export', { responseType: 'blob' });
+  const blob = new Blob([res.data], { type: 'text/csv;charset=utf-8;' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `TUMCU_Membership_Register_${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+

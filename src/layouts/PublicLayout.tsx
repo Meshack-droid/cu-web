@@ -9,6 +9,8 @@ const navLinks = [
   { to: '/about', label: 'About' },
   { to: '/ministries', label: 'Ministries' },
   { to: '/events', label: 'Events' },
+  { to: '/sermons', label: 'Sermons & Word' },
+  { to: '/elections', label: 'Elections' },
   { to: '/contact', label: 'Contact' },
 ];
 

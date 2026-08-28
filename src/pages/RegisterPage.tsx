@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
+import { HeartHandshake } from 'lucide-react';
 import { Card } from '@/components/Card';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
@@ -14,10 +15,28 @@ const DECLARATION_TEXT =
 
 export function RegisterPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<Partial<RegisterPayload>>({ membership_type: 'full' });
   const [declarationChecked, setDeclarationChecked] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const isFromVisitorCheckIn = searchParams.get('from') === 'checkin' || !!searchParams.get('email') || !!searchParams.get('fullName') || !!searchParams.get('name');
+
+  useEffect(() => {
+    const fullName = searchParams.get('fullName') || searchParams.get('name');
+    const email = searchParams.get('email');
+    const phoneNumber = searchParams.get('phoneNumber') || searchParams.get('phone');
+
+    if (fullName || email || phoneNumber) {
+      setForm((prev) => ({
+        ...prev,
+        full_name: fullName || prev.full_name,
+        email: email || prev.email,
+        phone_number: phoneNumber || prev.phone_number,
+      }));
+    }
+  }, [searchParams]);
 
   const mutation = useMutation({
     mutationFn: registerApi,
@@ -77,6 +96,18 @@ export function RegisterPage() {
   return (
     <div className="mesh-hero-bg flex min-h-screen items-center justify-center px-6 py-16">
       <Card variant="glass" className="w-full max-w-xl p-7 sm:p-9">
+        {isFromVisitorCheckIn && (
+          <div className="mb-6 flex items-start gap-3 rounded-2xl border border-primary-100 bg-primary-50/80 p-4 text-xs leading-5 text-primary-900 shadow-sm">
+            <HeartHandshake className="shrink-0 text-primary-700" size={20} />
+            <div>
+              <p className="font-bold text-primary-950">Welcome to the TUMCU Family!</p>
+              <p className="mt-0.5 text-slate-600">
+                We loved having you at our fellowship. Complete your membership registration below to join ministries, access spiritual resources, and become part of our community.
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="mb-6 flex items-center gap-2">
           {STEPS.map((label, i) => (
             <div key={label} className="flex flex-1 items-center gap-2">
@@ -128,19 +159,72 @@ export function RegisterPage() {
           <div className="mt-4 flex flex-col gap-4">
             <Input
               label="Admission number"
+              placeholder="e.g. BENG/2026/045"
               value={form.admission_number ?? ''}
               onChange={(e) => update('admission_number', e.target.value)}
             />
-            <label className="text-sm font-medium text-slate-700">Membership type</label>
-            <select
-              className="rounded-[var(--radius-input)] border border-slate-200 px-3.5 py-2.5 text-sm"
-              value={form.membership_type}
-              onChange={(e) => update('membership_type', e.target.value as RegisterPayload['membership_type'])}
-            >
-              <option value="full">Full Member</option>
-              <option value="special">Special Member</option>
-              <option value="associate">Associate Member</option>
-            </select>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Year of Education / Study (TUM Standards)
+              </label>
+              <select
+                className="w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none"
+                value={(form as any).year_of_study || 'Year 1 (Undergraduate)'}
+                onChange={(e) => update('year_of_study' as any, e.target.value)}
+              >
+                <option value="Year 1 (Undergraduate)">Year 1 (Undergraduate Degree)</option>
+                <option value="Year 2 (Undergraduate)">Year 2 (Undergraduate Degree)</option>
+                <option value="Year 3 (Undergraduate)">Year 3 (Undergraduate Degree)</option>
+                <option value="Year 4 (Undergraduate)">Year 4 (Undergraduate Degree)</option>
+                <option value="Year 5 (Undergraduate - Engineering/Arch)">Year 5 (Undergraduate - Engineering / Architecture)</option>
+                <option value="Diploma Year 1">Diploma Year 1</option>
+                <option value="Diploma Year 2">Diploma Year 2</option>
+                <option value="Diploma Year 3">Diploma Year 3</option>
+                <option value="Certificate Year 1">Certificate Year 1</option>
+                <option value="Certificate Year 2">Certificate Year 2</option>
+                <option value="Postgraduate / Masters">Postgraduate / Masters</option>
+                <option value="Associate / Staff / Alumni">Associate / Staff / Alumni</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Academic Department / Faculty (TUM)
+              </label>
+              <select
+                className="w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none"
+                value={(form as any).department || 'Department of Computing and Informatics'}
+                onChange={(e) => update('department' as any, e.target.value)}
+              >
+                <option value="Department of Computing and Informatics">Department of Computing and Informatics</option>
+                <option value="Department of Electrical and Electronic Engineering">Department of Electrical and Electronic Engineering</option>
+                <option value="Department of Mechanical and Automotive Engineering">Department of Mechanical and Automotive Engineering</option>
+                <option value="Department of Civil and Building Engineering">Department of Civil and Building Engineering</option>
+                <option value="Department of Mathematics and Physics">Department of Mathematics and Physics</option>
+                <option value="Department of Pure and Applied Sciences">Department of Pure and Applied Sciences</option>
+                <option value="Department of Business Administration">Department of Business Administration</option>
+                <option value="Department of Accounting and Finance">Department of Accounting and Finance</option>
+                <option value="Department of Hospitality and Tourism Management">Department of Hospitality and Tourism Management</option>
+                <option value="Department of Medical Sciences">Department of Medical Sciences</option>
+                <option value="Department of Environment and Health Sciences">Department of Environment and Health Sciences</option>
+                <option value="Department of Media and Graphic Design">Department of Media and Graphic Design</option>
+                <option value="Department of Humanities and Social Sciences">Department of Humanities and Social Sciences</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Membership Type</label>
+              <select
+                className="w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none"
+                value={form.membership_type}
+                onChange={(e) => update('membership_type', e.target.value as RegisterPayload['membership_type'])}
+              >
+                <option value="full">Full Member (Baptized/Born-Again TUM Student)</option>
+                <option value="special">Special Member (Non-Resident / Distance Learner)</option>
+                <option value="associate">Associate Member (Alumni / University Staff)</option>
+              </select>
+            </div>
           </div>
         )}
 

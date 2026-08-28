@@ -21,6 +21,9 @@ import adminRoutes from './modules/admin/routes/admin.routes';
 import attendanceRoutes from './modules/attendance/routes/attendance.routes';
 import prayerRequestsRoutes from './modules/prayer-requests/routes/prayer-requests.routes';
 import notificationsRoutes from './modules/notifications/routes/notifications.routes';
+import electionsRoutes from './modules/elections/routes/elections.routes';
+import sermonsRoutes from './modules/sermons/routes/sermons.routes';
+import geminiRoutes from './modules/gemini/routes/gemini.routes';
 import * as generatedModules from './modules/_generated/index';
 
 export function createApp() {
@@ -114,6 +117,9 @@ export function createApp() {
   api.use('/assets', generatedModules.assetsRoutes);
   api.use('/library-resources', generatedModules.libraryResourcesRoutes);
   api.use('/broadcast-messages', generatedModules.broadcastMessagesRoutes);
+  api.use('/elections', electionsRoutes);
+  api.use('/sermons', sermonsRoutes);
+  api.use('/gemini', geminiRoutes);
   api.use('/reports', generatedModules.reportsRoutes);
   api.use('/audit-logs', generatedModules.auditLogsRoutes);
 

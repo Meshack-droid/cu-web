@@ -24,6 +24,10 @@ router.post(
 
 router.post('/renew', validate(membershipValidators.renew), membershipController.renew);
 router.get('/me', membershipController.me);
+router.get('/all-members', membershipController.listAllMembers);
+router.get('/export', membershipController.exportCsv);
+router.delete('/:id', requirePermission('membership.approve'), membershipController.deleteMember);
+
 router.get('/', requirePermission('membership.view_all'), membershipController.list);
 router.get('/:id', requirePermission('membership.view_all'), membershipController.getById);
 

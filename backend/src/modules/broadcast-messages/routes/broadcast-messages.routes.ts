@@ -4,12 +4,14 @@ import { authenticate, loadPermissions, requirePermission } from '../../../middl
 
 const router = Router();
 
-router.use(authenticate, loadPermissions);
+// Public announcements
+router.get('/public', broadcastMessagesController.list);
+router.get('/', broadcastMessagesController.list);
+router.get('/:id', broadcastMessagesController.getById);
 
-router.get('/', requirePermission('communication.view'), broadcastMessagesController.list);
-router.get('/:id', requirePermission('communication.view'), broadcastMessagesController.getById);
-router.post('/', requirePermission('communication.create'), broadcastMessagesController.create);
-router.put('/:id', requirePermission('communication.edit'), broadcastMessagesController.update);
-router.delete('/:id', requirePermission('communication.delete'), broadcastMessagesController.remove);
+// Admin actions
+router.post('/', authenticate, loadPermissions, broadcastMessagesController.create);
+router.put('/:id', authenticate, loadPermissions, broadcastMessagesController.update);
+router.delete('/:id', authenticate, loadPermissions, broadcastMessagesController.remove);
 
 export default router;

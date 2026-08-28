@@ -14,6 +14,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import {
@@ -187,7 +188,12 @@ export function AdminRolesPage() {
 
   return (
     <div className="space-y-6">
-      <section className="mesh-hero-bg overflow-hidden rounded-[2rem] border border-white/60 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-8">
+      <motion.section
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="mesh-hero-bg overflow-hidden rounded-[2rem] border border-white/60 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-8"
+      >
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary-700 backdrop-blur-xl">
@@ -213,7 +219,7 @@ export function AdminRolesPage() {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       <Card variant="glass">
         <div className="mb-5 flex items-center justify-between gap-3">
@@ -236,7 +242,7 @@ export function AdminRolesPage() {
                   <button
                     type="button"
                     onClick={() => setOpenCategory(isOpen ? '' : category)}
-                    className="flex w-full items-center justify-between gap-4 p-4 text-left hover:bg-white/60"
+                    className="flex w-full items-center justify-between gap-4 p-4 text-left hover:bg-white/60 transition-colors"
                   >
                     <div className="flex min-w-0 items-center gap-3">
                       <div className="rounded-xl bg-primary-900/10 p-2.5 text-primary-800"><Icon size={18} /></div>
@@ -248,32 +254,42 @@ export function AdminRolesPage() {
                     {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                   </button>
 
-                  {isOpen && (
-                    <div className="grid gap-3 border-t border-white/60 p-4 lg:grid-cols-2">
-                      {Array.from(roleMap.values()).map(({ row, permissions }) => (
-                        <div key={row.role_code} className="rounded-2xl border border-white/70 bg-white/60 p-4 shadow-sm">
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <div className="font-semibold text-primary-950">{row.role_name}</div>
-                              <div className="mt-1 text-xs leading-5 text-slate-500">{roleDescriptions[row.role_code]}</div>
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="grid gap-3 border-t border-white/60 p-4 lg:grid-cols-2">
+                          {Array.from(roleMap.values()).map(({ row, permissions }) => (
+                            <div key={row.role_code} className="rounded-2xl border border-white/70 bg-white/60 p-4 shadow-sm">
+                              <div className="flex items-start justify-between gap-3">
+                                <div>
+                                  <div className="font-semibold text-primary-950">{row.role_name}</div>
+                                  <div className="mt-1 text-xs leading-5 text-slate-500">{roleDescriptions[row.role_code]}</div>
+                                </div>
+                                <span className="shrink-0 rounded-full bg-primary-900/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-primary-700">
+                                  {row.role_code === 'super_admin' ? 'Unrestricted' : category.replace(/_/g, ' ')}
+                                </span>
+                              </div>
+                              <div className="mt-3 flex flex-wrap gap-1.5">
+                                {permissions.length === 0 ? (
+                                  <span className="text-xs text-slate-400">No permissions assigned.</span>
+                                ) : permissions.map((permission) => (
+                                  <span key={permission} className="rounded-full border border-primary-100 bg-primary-50/80 px-2 py-1 text-[10px] font-medium text-primary-800">
+                                    {prettyPermission(permission)}
+                                  </span>
+                                ))}
+                              </div>
                             </div>
-                            <span className="shrink-0 rounded-full bg-primary-900/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-primary-700">
-                              {row.role_code === 'super_admin' ? 'Unrestricted' : category.replace(/_/g, ' ')}
-                            </span>
-                          </div>
-                          <div className="mt-3 flex flex-wrap gap-1.5">
-                            {permissions.length === 0 ? (
-                              <span className="text-xs text-slate-400">No permissions assigned.</span>
-                            ) : permissions.map((permission) => (
-                              <span key={permission} className="rounded-full border border-primary-100 bg-primary-50/80 px-2 py-1 text-[10px] font-medium text-primary-800">
-                                {prettyPermission(permission)}
-                              </span>
-                            ))}
-                          </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               );
             })}
@@ -289,123 +305,143 @@ export function AdminRolesPage() {
           </div>
         </div>
 
-        {!selectedUser ? (
-          <Card variant="glass">
-            <div className="flex items-center gap-2 rounded-2xl border border-white/70 bg-white/60 px-4 py-3 backdrop-blur-xl">
-              <Search size={16} className="text-slate-400" />
-              <input
-                autoFocus
-                placeholder="Search by name, email, or admission number..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
-              />
-            </div>
-            {search.trim().length >= 2 && (
-              <div className="mt-4 flex flex-col gap-2">
-                {searchResults?.length === 0 && <p className="py-3 text-sm text-slate-400">No members found.</p>}
-                {searchResults?.map((user) => (
-                  <button
-                    key={user.id}
-                    onClick={() => setSelectedUser(user)}
-                    className="flex items-center justify-between rounded-2xl border border-white/60 bg-white/50 p-4 text-left transition hover:-translate-y-0.5 hover:bg-white/80"
-                  >
-                    <div>
-                      <div className="text-sm font-semibold text-primary-950">{user.full_name}</div>
-                      <div className="text-xs text-slate-500">{user.email}</div>
-                    </div>
-                    <span className="rounded-full bg-primary-50 px-2.5 py-1 text-[10px] font-semibold uppercase text-primary-700">{user.account_status}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </Card>
-        ) : (
-          <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
-            <Card variant="glass">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-semibold text-primary-950">{selectedUser.full_name}</div>
-                  <div className="text-sm text-slate-500">{selectedUser.email}</div>
+        <AnimatePresence mode="wait">
+          {!selectedUser ? (
+            <motion.div
+              key="search"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Card variant="glass">
+                <div className="flex items-center gap-2 rounded-2xl border border-white/70 bg-white/60 px-4 py-3 backdrop-blur-xl">
+                  <Search size={16} className="text-slate-400" />
+                  <input
+                    autoFocus
+                    placeholder="Search by name, email, or admission number..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
+                  />
                 </div>
-                <button
-                  onClick={() => {
-                    setSelectedUser(null);
-                    setSearch('');
-                    setRoleId('');
-                    setScopeId('');
-                  }}
-                  className="rounded-full p-2 text-slate-400 hover:bg-white/70"
-                  aria-label="Change member"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-
-              <div className="mt-6">
-                <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-primary-900">
-                  <BriefcaseBusiness size={16} /> Current roles
-                </div>
-                {userRoles?.filter((r) => r.is_current).length === 0 && (
-                  <p className="text-sm text-slate-400">No additional roles — this person is a plain Member.</p>
-                )}
-                <div className="flex flex-col gap-2">
-                  {userRoles?.filter((r) => r.is_current).map((r) => (
-                    <div key={r.id} className="flex items-center justify-between gap-3 rounded-2xl bg-primary-50/80 px-3 py-2.5 text-sm">
-                      <span className="text-primary-800">
-                        {r.role_name}{r.scope_name && <span className="text-primary-500"> — {r.scope_name}</span>}
-                      </span>
-                      <button onClick={() => revokeMutation.mutate(r.id)} className="text-xs font-medium text-danger hover:underline">
-                        End role
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Card>
-
-            <Card variant="glass">
-              <div className="mb-4 text-sm font-semibold text-primary-900">Assign a new role</div>
-              <div className="flex flex-col gap-3">
-                <select
-                  value={roleId}
-                  onChange={(e) => { setRoleId(e.target.value); setScopeId(''); }}
-                  className="rounded-2xl border border-white/70 bg-white/70 px-3.5 py-3 text-sm outline-none backdrop-blur-xl"
-                >
-                  <option value="">Select a role...</option>
-                  {roles?.map((role) => <option key={role.id} value={role.id}>{role.name}</option>)}
-                </select>
-
-                {needsMinistryScope && (
-                  <select value={scopeId} onChange={(e) => setScopeId(e.target.value)} className="rounded-2xl border border-white/70 bg-white/70 px-3.5 py-3 text-sm outline-none">
-                    <option value="">Select a ministry...</option>
-                    {ministries?.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
-                  </select>
-                )}
-
-                {needsCommitteeScope && (
-                  <select value={scopeId} onChange={(e) => setScopeId(e.target.value)} className="rounded-2xl border border-white/70 bg-white/70 px-3.5 py-3 text-sm outline-none">
-                    <option value="">Select a committee...</option>
-                    {committees?.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </select>
-                )}
-
-                {selectedRole && (
-                  <div className="rounded-2xl border border-primary-100 bg-primary-50/60 p-3 text-xs leading-5 text-primary-800">
-                    <strong>{selectedRole.name}:</strong> {roleDescriptions[selectedRole.code] ?? 'Role access is controlled by the live permission matrix.'}
-                    {needsMinistryScope && <div className="mt-1 font-medium">Scope required: one Ministry.</div>}
-                    {needsCommitteeScope && <div className="mt-1 font-medium">Scope required: one Committee.</div>}
+                {search.trim().length >= 2 && (
+                  <div className="mt-4 flex flex-col gap-2">
+                    {searchResults?.length === 0 && <p className="py-3 text-sm text-slate-400">No members found.</p>}
+                    {searchResults?.map((user) => (
+                      <motion.button
+                        key={user.id}
+                        whileHover={{ y: -2 }}
+                        whileTap={{ scale: 0.99 }}
+                        onClick={() => setSelectedUser(user)}
+                        className="flex items-center justify-between rounded-2xl border border-white/60 bg-white/50 p-4 text-left transition hover:bg-white/80"
+                      >
+                        <div>
+                          <div className="text-sm font-semibold text-primary-950">{user.full_name}</div>
+                          <div className="text-xs text-slate-500">{user.email}</div>
+                        </div>
+                        <span className="rounded-full bg-primary-50 px-2.5 py-1 text-[10px] font-semibold uppercase text-primary-700">{user.account_status}</span>
+                      </motion.button>
+                    ))}
                   </div>
                 )}
+              </Card>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="details"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+              className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]"
+            >
+              <Card variant="glass">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-semibold text-primary-950">{selectedUser.full_name}</div>
+                    <div className="text-sm text-slate-500">{selectedUser.email}</div>
+                  </div>
+                  <motion.button
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => {
+                      setSelectedUser(null);
+                      setSearch('');
+                      setRoleId('');
+                      setScopeId('');
+                    }}
+                    className="rounded-full p-2 text-slate-400 hover:bg-white/70"
+                    aria-label="Change member"
+                  >
+                    <X size={16} />
+                  </motion.button>
+                </div>
 
-                {error && <p className="text-sm text-danger">{error}</p>}
-                <Button onClick={handleAssign} disabled={!roleId} loading={assignMutation.isPending} className="self-start px-6">
-                  Assign Role
-                </Button>
-              </div>
-            </Card>
-          </div>
-        )}
+                <div className="mt-6">
+                  <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-primary-900">
+                    <BriefcaseBusiness size={16} /> Current roles
+                  </div>
+                  {userRoles?.filter((r) => r.is_current).length === 0 && (
+                    <p className="text-sm text-slate-400">No additional roles — this person is a plain Member.</p>
+                  )}
+                  <div className="flex flex-col gap-2">
+                    {userRoles?.filter((r) => r.is_current).map((r) => (
+                      <div key={r.id} className="flex items-center justify-between gap-3 rounded-2xl bg-primary-50/80 px-3 py-2.5 text-sm">
+                        <span className="text-primary-800">
+                          {r.role_name}{r.scope_name && <span className="text-primary-500"> — {r.scope_name}</span>}
+                        </span>
+                        <button onClick={() => revokeMutation.mutate(r.id)} className="text-xs font-medium text-danger hover:underline">
+                          End role
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+
+              <Card variant="glass">
+                <div className="mb-4 text-sm font-semibold text-primary-900">Assign a new role</div>
+                <div className="flex flex-col gap-3">
+                  <select
+                    value={roleId}
+                    onChange={(e) => { setRoleId(e.target.value); setScopeId(''); }}
+                    className="rounded-2xl border border-white/70 bg-white/70 px-3.5 py-3 text-sm outline-none backdrop-blur-xl"
+                  >
+                    <option value="">Select a role...</option>
+                    {roles?.map((role) => <option key={role.id} value={role.id}>{role.name}</option>)}
+                  </select>
+
+                  {needsMinistryScope && (
+                    <select value={scopeId} onChange={(e) => setScopeId(e.target.value)} className="rounded-2xl border border-white/70 bg-white/70 px-3.5 py-3 text-sm outline-none">
+                      <option value="">Select a ministry...</option>
+                      {ministries?.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+                    </select>
+                  )}
+
+                  {needsCommitteeScope && (
+                    <select value={scopeId} onChange={(e) => setScopeId(e.target.value)} className="rounded-2xl border border-white/70 bg-white/70 px-3.5 py-3 text-sm outline-none">
+                      <option value="">Select a committee...</option>
+                      {committees?.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </select>
+                  )}
+
+                  {selectedRole && (
+                    <div className="rounded-2xl border border-primary-100 bg-primary-50/60 p-3 text-xs leading-5 text-primary-800">
+                      <strong>{selectedRole.name}:</strong> {roleDescriptions[selectedRole.code] ?? 'Role access is controlled by the live permission matrix.'}
+                      {needsMinistryScope && <div className="mt-1 font-medium">Scope required: one Ministry.</div>}
+                      {needsCommitteeScope && <div className="mt-1 font-medium">Scope required: one Committee.</div>}
+                    </div>
+                  )}
+
+                  {error && <p className="text-sm text-danger">{error}</p>}
+                  <Button onClick={handleAssign} disabled={!roleId} loading={assignMutation.isPending} className="self-start px-6">
+                    Assign Role
+                  </Button>
+                </div>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </section>
     </div>
   );

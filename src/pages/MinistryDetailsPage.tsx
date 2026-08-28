@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { motion } from 'motion/react';
 import { ArrowLeft, CalendarDays, CheckCircle2, Church, Clock3, LogIn, Users, UserPlus, UserMinus, Sparkles } from 'lucide-react';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
@@ -11,7 +12,14 @@ import { fetchMinistryDetails, fetchMyMinistryMembership, joinMinistry, leaveMin
 const FALLBACK: Record<string, { focus: string; blurb: string }> = {
   intercessory: { focus: 'Prayer & spiritual growth', blurb: 'A place to pray, intercede and strengthen the spiritual life of the Union.' },
   worship: { focus: 'Praise & worship', blurb: 'Serving through music and creating spaces for people to encounter God.' },
+  instrumentalists: { focus: 'Music & instruments', blurb: 'Skillfully ministering with musical instruments to support worship services.' },
+  ushering: { focus: 'Hospitality & welcome', blurb: 'Welcoming members and visitors, helping people connect and keeping gatherings orderly.' },
+  catering: { focus: 'Hospitality & care', blurb: 'Serving through hospitality at fellowships, conferences, retreats and special gatherings.' },
   media: { focus: 'Media & storytelling', blurb: 'Telling the TUMCU story through photography, video, design, livestream and digital communication.' },
+  creative: { focus: 'Arts & creativity', blurb: 'Using design, drama and creative arts to communicate the Gospel in fresh ways.' },
+  technicians: { focus: 'Technology & production', blurb: 'Keeping sound, lighting and technical systems ready for every service.' },
+  high_school: { focus: 'Mentorship & outreach', blurb: 'Reaching high school students through discipleship, mentorship and Christ-centred community.' },
+  hospital: { focus: 'Compassion & outreach', blurb: 'Visiting and ministering to patients, bringing prayer, compassion, comfort and the Gospel.' },
   brothers: { focus: 'Brotherhood & growth', blurb: 'Building Christ-centred brotherhood through fellowship, mentorship and accountability.' },
   sisters: { focus: 'Sisterhood & growth', blurb: 'Building a caring sisterhood through fellowship, mentorship, prayer and practical support.' },
 };
@@ -25,18 +33,33 @@ export function MinistryDetailsPage() {
     queryKey: ['membership', 'me'], queryFn: fetchMyMembershipStatus,
     enabled: isAuthenticated,
   });
+
+  const resolvedMinistryId = data?.ministry?.id || id;
+
   const { data: ministryMembership } = useQuery({
-    queryKey: ['ministry-membership', id], queryFn: () => fetchMyMinistryMembership(id), enabled: isAuthenticated && !!id,
+    queryKey: ['ministry-membership', resolvedMinistryId],
+    queryFn: () => fetchMyMinistryMembership(resolvedMinistryId),
+    enabled: isAuthenticated && !!resolvedMinistryId,
   });
+
   const activeMember = useMemo(() => membership?.memberships.some((m) => m.status === 'active') ?? false, [membership]);
 
   const joinMutation = useMutation({
-    mutationFn: () => joinMinistry(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['ministry-membership', id] }),
+    mutationFn: () => joinMinistry(resolvedMinistryId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ministry-membership', resolvedMinistryId] });
+      queryClient.invalidateQueries({ queryKey: ['ministry-membership', id] });
+      queryClient.invalidateQueries({ queryKey: ['ministry', id] });
+    },
   });
+
   const leaveMutation = useMutation({
-    mutationFn: () => leaveMinistry(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['ministry-membership', id] }),
+    mutationFn: () => leaveMinistry(resolvedMinistryId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ministry-membership', resolvedMinistryId] });
+      queryClient.invalidateQueries({ queryKey: ['ministry-membership', id] });
+      queryClient.invalidateQueries({ queryKey: ['ministry', id] });
+    },
   });
 
   if (isLoading) return <div className="page-shell section-pad"><Card variant="glass" className="animate-pulse"><div className="h-10 w-2/3 rounded bg-slate-200"/><div className="mt-4 h-5 w-full rounded bg-slate-100"/><div className="mt-2 h-5 w-5/6 rounded bg-slate-100"/></Card></div>;
@@ -65,7 +88,7 @@ export function MinistryDetailsPage() {
     </>
   );
 
-  return <div className="overflow-hidden">
+  return <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="overflow-hidden">
     <section className="mesh-hero-bg px-5 pb-16 pt-8 sm:px-6 lg:pb-20 lg:pt-12">
       <div className="page-shell">
         <Link to="/ministries" className="inline-flex items-center gap-2 text-sm font-bold text-primary-700 hover:text-primary-500"><ArrowLeft size={16}/> All ministries</Link>
@@ -100,5 +123,5 @@ export function MinistryDetailsPage() {
       </div>
       <Card variant="glass" className="mt-6"><div className="flex items-center gap-3"><CalendarDays className="text-primary-700"/><div><h2 className="font-black text-primary-950">Your ministry journey</h2><p className="text-sm text-slate-500">Connected members can access ministry-specific activities as those features are published.</p></div></div></Card>
     </section>
-  </div>;
+  </motion.div>;
 }

@@ -44,6 +44,12 @@ export class ConflictError extends AppError {
   }
 }
 
+export class BadRequestError extends AppError {
+  constructor(message = 'Bad request') {
+    super(message, 400, 'BAD_REQUEST');
+  }
+}
+
 export class BusinessRuleError extends AppError {
   constructor(message: string) {
     super(message, 400, 'BUSINESS_RULE_ERROR');

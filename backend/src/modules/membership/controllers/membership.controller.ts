@@ -73,4 +73,22 @@ export const membershipController = {
       totalPages: result.totalPages,
     });
   }),
+
+  listAllMembers: asyncHandler(async (req: Request, res: Response) => {
+    const { search, year_of_study, department, status } = req.query as Record<string, string>;
+    const members = await membershipService.listAllMembersWithDetails(search, year_of_study, department, status);
+    return sendSuccess(res, members, 'All members retrieved');
+  }),
+
+  deleteMember: asyncHandler(async (req: Request, res: Response) => {
+    const result = await membershipService.deleteMember(req.params.id);
+    return sendSuccess(res, result, 'Member removed from register successfully');
+  }),
+
+  exportCsv: asyncHandler(async (_req: Request, res: Response) => {
+    const { filename, csv } = await membershipService.exportMembersCsv();
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    return res.status(200).send(csv);
+  }),
 };

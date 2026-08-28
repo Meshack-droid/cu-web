@@ -31,7 +31,7 @@ export function HomePage() {
         <div className="page-shell relative grid items-center gap-12 lg:grid-cols-[1.02fr_.98fr]">
           <div className="relative z-10">
             <span className="eyebrow"><Sparkles size={14} /> A community on mission</span>
-            <h1 className="mt-6 max-w-3xl text-5xl font-black leading-[.98] tracking-[-.045em] text-primary-900 sm:text-6xl lg:text-7xl">Faith that feels <span className="text-primary-500">alive.</span></h1>
+            <h1 className="mt-6 max-w-3xl text-4xl font-black leading-[1.1] tracking-[-.035em] text-primary-900 sm:text-5xl lg:text-6xl">The Technical University of Mombasa <span className="text-primary-500">Christian Union</span></h1>
             <p className="mt-7 max-w-xl text-base leading-8 text-slate-600 sm:text-lg">Welcome to TUMCU — a Christ-centred community where students discover purpose, grow in the Word, find family and learn to serve.</p>
             <div className="mt-9 flex flex-wrap gap-3">
               <Link to="/register"><Button variant="primary" className="px-6 py-3.5 text-sm font-bold">Join the community <ArrowRight size={17} /></Button></Link>
@@ -100,10 +100,21 @@ export function HomePage() {
       </section>
 
       <section className="page-shell pb-24">
-        <Card variant="glass" className="relative overflow-hidden border-primary-100/60 bg-primary-900/95 p-8 text-white sm:p-12">
-          <div className="absolute -right-10 -top-20 h-60 w-60 rounded-full bg-gold-500/15 blur-3xl" />
-          <div className="relative grid items-center gap-8 md:grid-cols-[1fr_auto]"><div><span className="text-xs font-black uppercase tracking-[.2em] text-gold-400">Find your place</span><h2 className="mt-3 text-3xl font-black sm:text-4xl">Ready to be part of the story?</h2><p className="mt-3 max-w-2xl leading-7 text-white/65">Meet people, discover your gifts and grow in your walk with Christ.</p></div><Link to="/register"><Button variant="secondary" className="px-7 py-3.5 font-bold">Join TUMCU <ArrowRight size={17} /></Button></Link></div>
-        </Card>
+        <div className="relative overflow-hidden rounded-[var(--radius-glass)] border border-primary-200/80 bg-white/90 p-8 shadow-xl backdrop-blur-xl sm:p-12">
+          <div className="absolute -right-10 -top-20 h-60 w-60 rounded-full bg-primary-500/10 blur-3xl" />
+          <div className="relative grid items-center gap-8 md:grid-cols-[1fr_auto]">
+            <div>
+              <span className="text-xs font-black uppercase tracking-[.2em] text-primary-600">Find your place</span>
+              <h2 className="mt-3 text-3xl font-black tracking-tight text-primary-700 sm:text-4xl">Ready to be part of the story?</h2>
+              <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600">Meet people, discover your gifts and grow in your walk with Christ.</p>
+            </div>
+            <Link to="/register">
+              <Button variant="primary" className="px-7 py-3.5 font-bold shadow-md">
+                Join TUMCU <ArrowRight size={17} />
+              </Button>
+            </Link>
+          </div>
+        </div>
       </section>
     </div>
   );
