@@ -102,6 +102,11 @@ export class MembershipService {
       throw new BusinessRuleError('An approved application cannot be rejected');
     }
 
+    await pool.query(
+      `UPDATE users SET account_status = 'rejected' WHERE id = :userId`,
+      { userId: application.user_id }
+    );
+
     return this.applications.update(applicationId, {
       status: 'rejected',
       reviewed_by: reviewerId,
@@ -190,8 +195,16 @@ export class MembershipService {
     const ministryMembers = (minMembers as any[]) || [];
     const allMinistries = (ministries as any[]) || [];
 
-    let result = users.map((u) => {
-      const mem = memberships.find((m) => m.user_id === u.id) || null;
+    // Filter out users who are still awaiting approval or rejected and do not have an approved membership
+    const registeredMembers = users.filter((u) => {
+      const mem = memberships.find((m) => m.user_id === u.id || m.userId === u.id);
+      const isPendingOrRejected = u.account_status === 'pending_approval' || u.account_status === 'rejected';
+      if (isPendingOrRejected && !mem) return false;
+      return true;
+    });
+
+    let result = registeredMembers.map((u) => {
+      const mem = memberships.find((m) => m.user_id === u.id || m.userId === u.id) || null;
       const uRole = userRoles.find((ur) => ur.user_id === u.id);
       const roleObj = uRole ? allRoles.find((r) => r.id === uRole.role_id) : null;
       const userMins = ministryMembers
@@ -210,10 +223,10 @@ export class MembershipService {
         admission_number: u.admission_number || 'N/A',
         year_of_study: typeof u.year_of_study === 'number' ? `Year ${u.year_of_study}` : String(u.year_of_study || 'Year 1'),
         department: u.department || u.school || 'School of Computing and Informatics',
-        membership_number: mem?.membership_number || `TUMCU/${new Date().getFullYear()}/${u.admission_number?.slice(-3) || '101'}`,
+        membership_number: mem?.membership_number || mem?.membershipNumber || `TUMCU/${new Date().getFullYear()}/${u.admission_number?.slice(-3) || '101'}`,
         membership_type: mem?.membership_type_id === 'mt-special' ? 'Special Member' : 'Full Member',
         status: mem?.status || u.account_status || 'active',
-        registration_date: mem?.registration_date || u.created_at,
+        registration_date: mem?.registration_date || mem?.registrationDate || u.created_at,
         role_name: roleObj?.name || 'Member',
         ministries: userMins.length > 0 ? userMins.join(', ') : 'None',
       };

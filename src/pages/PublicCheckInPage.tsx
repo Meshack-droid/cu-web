@@ -9,6 +9,8 @@ import {
   Sparkles,
   UserPlus,
   ArrowRight,
+  ArrowLeft,
+  Home,
   MapPin,
   Clock,
   BookOpen,
@@ -155,6 +157,18 @@ export function PublicCheckInPage() {
   return (
     <div className="mesh-hero-bg min-h-screen flex flex-col justify-between px-4 py-8 sm:py-12">
       <div className="w-full max-w-xl mx-auto space-y-6">
+        {/* Top Back to Home Navigation */}
+        <div className="flex items-center justify-between">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/70 px-3.5 py-1.5 text-xs font-bold text-slate-700 shadow-xs backdrop-blur-md hover:bg-white hover:text-primary-900 transition active:scale-95"
+          >
+            <ArrowLeft size={14} />
+            <Home size={14} className="text-primary-700" />
+            <span>Back to Home</span>
+          </Link>
+        </div>
+
         {/* Top Church Header */}
         <div className="text-center space-y-2">
           <div className="mx-auto h-14 w-14 rounded-3xl bg-primary-800 text-white shadow-xl shadow-primary-950/20 grid place-items-center mb-3">

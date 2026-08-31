@@ -124,11 +124,104 @@ const memoryDb: MemoryDB = {
         course: 'BSc. Computer Science',
         year_of_study: 4,
         account_status: 'active',
-        created_at: new Date().toISOString(),
+        created_at: new Date(Date.now() - 30 * 86400000).toISOString(),
+      },
+      {
+        id: 'usr-chair-1',
+        username: 'chairperson',
+        email: 'chairperson@tumcu.ac.ke',
+        phone_number: '+254700000002',
+        password_hash: bcrypt.hashSync('Admin@12345', 10),
+        full_name: 'David Mutua (Chairperson)',
+        gender: 'male',
+        admission_number: 'BENG/2023/004',
+        school: 'School of Engineering and Technology',
+        course: 'BSc. Mechanical Engineering',
+        year_of_study: 4,
+        account_status: 'active',
+        created_at: new Date(Date.now() - 250 * 86400000).toISOString(),
+      },
+      {
+        id: 'usr-leader-1',
+        username: 'worship_leader',
+        email: 'worship.leader@tumcu.ac.ke',
+        phone_number: '+254700000003',
+        password_hash: bcrypt.hashSync('Admin@12345', 10),
+        full_name: 'Mercy Wanjiku (Worship Leader)',
+        gender: 'female',
+        admission_number: 'BBIT/2024/029',
+        school: 'School of Business and Social Sciences',
+        course: 'BSc. Information Technology',
+        year_of_study: 3,
+        account_status: 'active',
+        created_at: new Date(Date.now() - 200 * 86400000).toISOString(),
+      },
+      {
+        id: 'usr-member-1',
+        username: 'caleb_kiprop',
+        email: 'member@tumcu.ac.ke',
+        phone_number: '+254712345678',
+        password_hash: bcrypt.hashSync('Admin@12345', 10),
+        full_name: 'Caleb Kiprop',
+        gender: 'male',
+        admission_number: 'BSCS/2024/015',
+        school: 'School of Computing and Informatics',
+        course: 'BSc. Computer Science',
+        year_of_study: 3,
+        account_status: 'active',
+        created_at: new Date(Date.now() - 150 * 86400000).toISOString(),
+      },
+      {
+        id: 'usr-app-1',
+        username: 'faith_chebet',
+        email: 'faith.chebet@students.tum.ac.ke',
+        phone_number: '+254711223344',
+        password_hash: bcrypt.hashSync('Password123!', 10),
+        full_name: 'Faith Chebet',
+        gender: 'female',
+        admission_number: 'BSCS/2026/042',
+        school: 'School of Computing and Informatics',
+        course: 'BSc. Computer Science',
+        year_of_study: 1,
+        account_status: 'pending_approval',
+        created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
+      },
+      {
+        id: 'usr-app-2',
+        username: 'emmanuel_mwangi',
+        email: 'emmanuel.mwangi@students.tum.ac.ke',
+        phone_number: '+254722334455',
+        password_hash: bcrypt.hashSync('Password123!', 10),
+        full_name: 'Emmanuel Mwangi',
+        gender: 'male',
+        admission_number: 'BENG/2026/108',
+        school: 'School of Engineering and Technology',
+        course: 'BSc. Electrical & Electronic Engineering',
+        year_of_study: 2,
+        account_status: 'pending_approval',
+        created_at: new Date(Date.now() - 1 * 86400000).toISOString(),
+      },
+      {
+        id: 'usr-app-3',
+        username: 'dorcas_otieno',
+        email: 'dorcas.otieno@students.tum.ac.ke',
+        phone_number: '+254733445566',
+        password_hash: bcrypt.hashSync('Password123!', 10),
+        full_name: 'Dorcas Achieng Otieno',
+        gender: 'female',
+        admission_number: 'BBIT/2026/089',
+        school: 'School of Business and Social Sciences',
+        course: 'BSc. Information Technology',
+        year_of_study: 1,
+        account_status: 'pending_approval',
+        created_at: new Date(Date.now() - 4 * 3600000).toISOString(),
       },
     ],
     user_roles: [
       { id: 'ur-1', user_id: 'usr-admin-1', role_id: 'role-1', scope_type: null, scope_id: null },
+      { id: 'ur-2', user_id: 'usr-chair-1', role_id: 'role-3', scope_type: null, scope_id: null },
+      { id: 'ur-3', user_id: 'usr-leader-1', role_id: 'role-9', scope_type: 'ministry', scope_id: 'min-2' },
+      { id: 'ur-4', user_id: 'usr-member-1', role_id: 'role-10', scope_type: null, scope_id: null },
     ],
     events: [],
     meetings: [],
@@ -139,8 +232,78 @@ const memoryDb: MemoryDB = {
     membership_declarations: [
       { id: 'decl-1', version: '2026.1', title: 'TUMCU Doctrinal Basis & Member Commitment', content: 'I affirm faith in Jesus Christ as Lord and Saviour and agree to live by Scripture and uphold TUMCU fellowship.', is_active: true },
     ],
-    memberships: [],
-    membership_applications: [],
+    memberships: [
+      {
+        id: 'mem-admin-1',
+        user_id: 'usr-admin-1',
+        membership_type_id: '1',
+        spiritual_year_id: 'sy-2026',
+        declaration_id: 'decl-1',
+        membership_number: 'TUMCU-2026-0001',
+        status: 'active',
+        registration_date: '2025-09-01',
+        created_at: new Date(Date.now() - 300 * 86400000).toISOString(),
+      },
+      {
+        id: 'mem-chair-1',
+        user_id: 'usr-chair-1',
+        membership_type_id: '1',
+        spiritual_year_id: 'sy-2026',
+        declaration_id: 'decl-1',
+        membership_number: 'TUMCU-2026-0002',
+        status: 'active',
+        registration_date: '2025-09-01',
+        created_at: new Date(Date.now() - 300 * 86400000).toISOString(),
+      },
+      {
+        id: 'mem-leader-1',
+        user_id: 'usr-leader-1',
+        membership_type_id: '1',
+        spiritual_year_id: 'sy-2026',
+        declaration_id: 'decl-1',
+        membership_number: 'TUMCU-2026-0003',
+        status: 'active',
+        registration_date: '2025-09-01',
+        created_at: new Date(Date.now() - 200 * 86400000).toISOString(),
+      },
+      {
+        id: 'mem-member-1',
+        user_id: 'usr-member-1',
+        membership_type_id: '1',
+        spiritual_year_id: 'sy-2026',
+        declaration_id: 'decl-1',
+        membership_number: 'TUMCU-2026-0004',
+        status: 'active',
+        registration_date: '2025-09-01',
+        created_at: new Date(Date.now() - 150 * 86400000).toISOString(),
+      },
+    ],
+    membership_applications: [
+      {
+        id: 'app-seed-1',
+        user_id: 'usr-app-1',
+        membership_type_id: '1',
+        status: 'submitted',
+        rejection_reason: null,
+        created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
+      },
+      {
+        id: 'app-seed-2',
+        user_id: 'usr-app-2',
+        membership_type_id: '1',
+        status: 'under_review',
+        rejection_reason: null,
+        created_at: new Date(Date.now() - 1 * 86400000).toISOString(),
+      },
+      {
+        id: 'app-seed-3',
+        user_id: 'usr-app-3',
+        membership_type_id: '1',
+        status: 'submitted',
+        rejection_reason: null,
+        created_at: new Date(Date.now() - 4 * 3600000).toISOString(),
+      },
+    ],
     refresh_tokens: [],
     security_events: [],
     attendance_sessions: [],
@@ -483,18 +646,24 @@ function executeInMemoryQuery(sql: string, params: Record<string, any> = {}): an
   if (cleanSql.includes('membership_applications') && cleanSql.includes('users')) {
     let apps = memoryDb.tables.membership_applications || [];
     if (params.status) apps = apps.filter((a) => a.status === params.status);
+    if (params.userId || params.user_id) {
+      const uid = params.userId || params.user_id;
+      apps = apps.filter((a) => (a.user_id === uid || a.userId === uid));
+    }
     const rows = apps.map((ma) => {
-      const user = memoryDb.tables.users.find((u) => u.id === ma.user_id);
-      const mt = memoryDb.tables.membership_types.find((t) => t.id === ma.membership_type_id);
+      const userId = ma.user_id || ma.userId;
+      const typeId = ma.membership_type_id || ma.membershipTypeId;
+      const user = memoryDb.tables.users.find((u) => u.id === userId);
+      const mt = memoryDb.tables.membership_types.find((t) => t.id === typeId || t.code === typeId);
       return {
         id: ma.id,
         status: ma.status,
-        rejection_reason: ma.rejection_reason || null,
+        rejection_reason: ma.rejection_reason || ma.rejectionReason || null,
         created_at: ma.created_at,
-        user_id: user?.id || ma.user_id,
-        full_name: user?.full_name || 'Member Applicant',
+        user_id: user?.id || userId,
+        full_name: user?.full_name || user?.fullName || 'Member Applicant',
         email: user?.email || '',
-        admission_number: user?.admission_number || '',
+        admission_number: user?.admission_number || user?.admissionNumber || '',
         membership_type_name: mt?.name || 'Full Member (Student)',
       };
     });
@@ -560,12 +729,72 @@ function executeInMemoryQuery(sql: string, params: Record<string, any> = {}): an
   // --- 1. INSERT ---
   if (upperSql.startsWith('INSERT')) {
     const table = targetTable;
-    const row = { ...params };
+    const row: Record<string, any> = { ...params };
     if (!row.id) row.id = uuidv4();
     if (!row.created_at) row.created_at = new Date().toISOString();
 
+    // Map common camelCase / snake_case equivalents
+    if (params.userId !== undefined && row.user_id === undefined) row.user_id = params.userId;
+    if (params.user_id !== undefined && row.userId === undefined) row.userId = params.user_id;
+    if (params.fullName !== undefined && row.full_name === undefined) row.full_name = params.fullName;
+    if (params.full_name !== undefined && row.fullName === undefined) row.fullName = params.full_name;
+    if (params.phoneNumber !== undefined && row.phone_number === undefined) row.phone_number = params.phoneNumber;
+    if (params.admissionNumber !== undefined && row.admission_number === undefined) row.admission_number = params.admissionNumber;
+    if (params.passwordHash !== undefined && row.password_hash === undefined) row.password_hash = params.passwordHash;
+    if (params.membershipTypeId !== undefined && row.membership_type_id === undefined) row.membership_type_id = params.membershipTypeId;
+    if (params.membership_type_id !== undefined && row.membershipTypeId === undefined) row.membershipTypeId = params.membership_type_id;
+    if (params.spiritualYearId !== undefined && row.spiritual_year_id === undefined) row.spiritual_year_id = params.spiritualYearId;
+    if (params.declarationId !== undefined && row.declaration_id === undefined) row.declaration_id = params.declarationId;
+    if (params.membershipNumber !== undefined && row.membership_number === undefined) row.membership_number = params.membershipNumber;
+
+    // Parse literal values in INSERT statement VALUES clause if not provided in params
+    if (table === 'membership_applications') {
+      if (!row.status) {
+        if (cleanSql.includes("'submitted'") || cleanSql.includes('"submitted"')) row.status = 'submitted';
+        else if (cleanSql.includes("'under_review'") || cleanSql.includes('"under_review"')) row.status = 'under_review';
+        else if (cleanSql.includes("'approved'") || cleanSql.includes('"approved"')) row.status = 'approved';
+        else if (cleanSql.includes("'rejected'") || cleanSql.includes('"rejected"')) row.status = 'rejected';
+        else row.status = 'submitted';
+      }
+    }
+    if (table === 'memberships') {
+      if (!row.status) {
+        if (cleanSql.includes("'active'") || cleanSql.includes('"active"')) row.status = 'active';
+        else row.status = 'active';
+      }
+      if (!row.registration_date) row.registration_date = new Date().toISOString().split('T')[0];
+      if (!row.registrationDate) row.registrationDate = row.registration_date;
+    }
+    if (table === 'users') {
+      if (!row.account_status) {
+        if (cleanSql.includes("'pending_approval'") || cleanSql.includes('"pending_approval"')) row.account_status = 'pending_approval';
+        else if (cleanSql.includes("'active'") || cleanSql.includes('"active"')) row.account_status = 'active';
+        else if (cleanSql.includes("'rejected'") || cleanSql.includes('"rejected"')) row.account_status = 'rejected';
+      }
+    }
+
+    // Specific mapping for refresh_tokens
+    if (table === 'refresh_tokens') {
+      const uId = params.userId || params.user_id;
+      const tHash = params.tokenHash || params.token_hash;
+      const expAt = params.expiresAt || params.expires_at;
+      row.user_id = uId;
+      row.userId = uId;
+      row.token_hash = tHash;
+      row.tokenHash = tHash;
+      row.expires_at = expAt ? (expAt instanceof Date ? expAt.toISOString() : String(expAt)) : new Date(Date.now() + 30 * 86400000).toISOString();
+      row.expiresAt = row.expires_at;
+      row.revoked_at = null;
+      row.revokedAt = null;
+    }
+
     // Check unique constraints / on duplicate key
-    const existingIndex = memoryDb.tables[table]?.findIndex((r) => r.id === row.id || (row.email && r.email === row.email) || (row.code && r.code === row.code));
+    const existingIndex = memoryDb.tables[table]?.findIndex((r) =>
+      r.id === row.id ||
+      (row.email && r.email === row.email) ||
+      (row.code && r.code === row.code) ||
+      (table === 'refresh_tokens' && row.token_hash && (r.token_hash === row.token_hash || r.tokenHash === row.token_hash))
+    );
     if (existingIndex !== undefined && existingIndex >= 0) {
       memoryDb.tables[table][existingIndex] = { ...memoryDb.tables[table][existingIndex], ...row };
     } else if (memoryDb.tables[table]) {
@@ -579,9 +808,83 @@ function executeInMemoryQuery(sql: string, params: Record<string, any> = {}): an
     const table = targetTable;
     const records = memoryDb.tables[table] || [];
     let updatedCount = 0;
+    const nowIso = new Date().toISOString();
+
     for (let i = 0; i < records.length; i++) {
+      let matches = false;
+
       if (params.id && records[i].id === params.id) {
-        records[i] = { ...records[i], ...params, updated_at: new Date().toISOString() };
+        matches = true;
+      } else if (params.applicationId && records[i].id === params.applicationId) {
+        matches = true;
+      } else if (params.registrationId && records[i].id === params.registrationId) {
+        matches = true;
+      } else if (params.candidateId && records[i].id === params.candidateId) {
+        matches = true;
+      } else if (params.userRoleId && records[i].id === params.userRoleId) {
+        matches = true;
+      } else if (table === 'refresh_tokens') {
+        const tHash = params.tokenHash || params.token_hash;
+        const uId = params.userId || params.user_id;
+        if (tHash && (records[i].token_hash === tHash || records[i].tokenHash === tHash)) {
+          matches = true;
+        } else if (uId && (records[i].user_id === uId || records[i].userId === uId)) {
+          matches = true;
+        }
+      } else if (table === 'users' && (params.userId || params.user_id) && records[i].id === (params.userId || params.user_id)) {
+        matches = true;
+      }
+
+      if (matches) {
+        const updatePayload: Record<string, any> = { ...params, updated_at: nowIso };
+        if (cleanSql.includes('revoked_at = NOW()') || upperSql.includes('REVOKED_AT = NOW()')) {
+          updatePayload.revoked_at = nowIso;
+          updatePayload.revokedAt = nowIso;
+        }
+        if (cleanSql.includes('reviewed_at = NOW()') || upperSql.includes('REVIEWED_AT = NOW()')) {
+          updatePayload.reviewed_at = nowIso;
+          updatePayload.reviewedAt = nowIso;
+        }
+        if (cleanSql.includes('last_login_at = NOW()') || upperSql.includes('LAST_LOGIN_AT = NOW()')) {
+          updatePayload.last_login_at = nowIso;
+        }
+        if (cleanSql.includes("status = 'approved'") || cleanSql.includes('status = "approved"')) {
+          updatePayload.status = 'approved';
+        }
+        if (cleanSql.includes("status = 'rejected'") || cleanSql.includes('status = "rejected"')) {
+          updatePayload.status = 'rejected';
+        }
+        if (cleanSql.includes("status = 'under_review'") || cleanSql.includes('status = "under_review"')) {
+          updatePayload.status = 'under_review';
+        }
+        if (cleanSql.includes("status = 'active'") || cleanSql.includes('status = "active"')) {
+          updatePayload.status = 'active';
+        }
+        if (cleanSql.includes("status = 'attended'") || cleanSql.includes('status = "attended"')) {
+          updatePayload.status = 'attended';
+        }
+        if (cleanSql.includes("status = 'cancelled'") || cleanSql.includes('status = "cancelled"')) {
+          updatePayload.status = 'cancelled';
+        }
+        if (cleanSql.includes("account_status = 'active'") || cleanSql.includes('account_status = "active"')) {
+          updatePayload.account_status = 'active';
+        }
+        if (cleanSql.includes("account_status = 'rejected'") || cleanSql.includes('account_status = "rejected"')) {
+          updatePayload.account_status = 'rejected';
+        }
+        if (cleanSql.includes("account_status = 'suspended'") || cleanSql.includes('account_status = "suspended"')) {
+          updatePayload.account_status = 'suspended';
+        }
+        if (cleanSql.includes('is_current = FALSE') || cleanSql.includes('is_current = false')) {
+          updatePayload.is_current = false;
+        }
+        if (cleanSql.includes('is_current = TRUE') || cleanSql.includes('is_current = true')) {
+          updatePayload.is_current = true;
+        }
+        if (cleanSql.includes('votes_count = votes_count + 1')) {
+          updatePayload.votes_count = (records[i].votes_count || 0) + 1;
+        }
+        records[i] = { ...records[i], ...updatePayload };
         updatedCount++;
       }
     }
@@ -591,8 +894,13 @@ function executeInMemoryQuery(sql: string, params: Record<string, any> = {}): an
   // --- 3. DELETE ---
   if (upperSql.startsWith('DELETE')) {
     const table = targetTable;
-    if (params.id && memoryDb.tables[table]) {
-      memoryDb.tables[table] = memoryDb.tables[table].filter((r) => r.id !== params.id);
+    if (memoryDb.tables[table]) {
+      const uId = params.userId || params.user_id;
+      if (params.id) {
+        memoryDb.tables[table] = memoryDb.tables[table].filter((r) => r.id !== params.id);
+      } else if (uId) {
+        memoryDb.tables[table] = memoryDb.tables[table].filter((r) => r.user_id !== uId && r.userId !== uId && r.id !== uId);
+      }
     }
     return [{ affectedRows: 1 }];
   }
@@ -620,6 +928,41 @@ function executeInMemoryQuery(sql: string, params: Record<string, any> = {}): an
   const table = targetTable;
   let rows = memoryDb.tables[table] || [];
 
+  if (table === 'refresh_tokens') {
+    const tHash = params.tokenHash || params.token_hash;
+    const uId = params.userId || params.user_id;
+    if (tHash) {
+      rows = rows.filter((r) => r.token_hash === tHash || r.tokenHash === tHash);
+    }
+    if (uId) {
+      rows = rows.filter((r) => r.user_id === uId || r.userId === uId);
+    }
+    if (cleanSql.includes('revoked_at IS NULL') || upperSql.includes('REVOKED_AT IS NULL')) {
+      rows = rows.filter((r) => !r.revoked_at && !r.revokedAt);
+    }
+    if (cleanSql.includes('expires_at > NOW()') || upperSql.includes('EXPIRES_AT > NOW()')) {
+      rows = rows.filter((r) => {
+        const exp = r.expires_at || r.expiresAt;
+        return !exp || new Date(exp).getTime() > Date.now();
+      });
+    }
+    // Return mapped copies with both snake_case and camelCase
+    return [
+      rows.map((r) => ({
+        ...r,
+        id: r.id,
+        user_id: r.user_id || r.userId,
+        userId: r.user_id || r.userId,
+        token_hash: r.token_hash || r.tokenHash,
+        tokenHash: r.token_hash || r.tokenHash,
+        expires_at: r.expires_at || r.expiresAt,
+        expiresAt: r.expires_at || r.expiresAt,
+        revoked_at: r.revoked_at || r.revokedAt || null,
+        revokedAt: r.revoked_at || r.revokedAt || null,
+      })),
+    ];
+  }
+
   // Filter by params
   if (params.idOrCode) {
     rows = rows.filter((r) => r.id === params.idOrCode || r.code === params.idOrCode || (r.code && r.code.toLowerCase() === String(params.idOrCode).toLowerCase()));
@@ -631,11 +974,25 @@ function executeInMemoryQuery(sql: string, params: Record<string, any> = {}): an
       rows = rows.filter((r) => r.id === params.id);
     }
   }
-  if (params.code) rows = rows.filter((r) => r.code === params.code);
-  if (params.email) rows = rows.filter((r) => r.email === params.email);
-  if (params.username) rows = rows.filter((r) => r.username === params.username);
+  if (params.code) rows = rows.filter((r) => r.code && r.code.toLowerCase() === String(params.code).toLowerCase());
+  if (params.email) rows = rows.filter((r) => r.email && r.email.toLowerCase() === String(params.email).trim().toLowerCase());
+  if (params.username) rows = rows.filter((r) => r.username && r.username.toLowerCase() === String(params.username).trim().toLowerCase());
   if (params.identifier) {
-    rows = rows.filter((r) => r.email === params.identifier || r.username === params.identifier || r.admission_number === params.identifier);
+    const idClean = String(params.identifier).trim();
+    const idLower = idClean.toLowerCase();
+    const idDigits = idClean.replace(/[^0-9]/g, '');
+    rows = rows.filter((r) => {
+      const emailMatch = r.email && r.email.toLowerCase() === idLower;
+      const userMatch = r.username && r.username.toLowerCase() === idLower;
+      const admMatch = r.admission_number && r.admission_number.toLowerCase() === idLower;
+      const phoneClean = r.phone_number ? String(r.phone_number).replace(/[^0-9]/g, '') : '';
+      const phoneMatch = r.phone_number && (
+        r.phone_number.toLowerCase() === idLower ||
+        (idDigits.length >= 8 && phoneClean.length >= 8 && phoneClean.slice(-9) === idDigits.slice(-9)) ||
+        (idDigits.length >= 7 && phoneClean.length >= 7 && (phoneClean.endsWith(idDigits) || idDigits.endsWith(phoneClean)))
+      );
+      return emailMatch || userMatch || admMatch || phoneMatch;
+    });
   }
   if (params.user_id || params.userId) {
     const uid = params.user_id || params.userId;

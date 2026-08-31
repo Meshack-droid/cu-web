@@ -17,6 +17,7 @@ import {
 import { AnimatePresence, motion } from 'motion/react';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
+import { PageHeaderGuide } from '@/components/PageHeaderGuide';
 import {
   assignRole,
   fetchCommittees,
@@ -140,7 +141,9 @@ export function AdminRolesPage() {
       if (!groups.has(row.category)) groups.set(row.category, new Map());
       const category = groups.get(row.category)!;
       if (!category.has(row.role_code)) category.set(row.role_code, { row, permissions: [] });
-      if (row.permission_code) category.get(row.role_code)!.permissions.push(row.permission_code);
+      if (row.permission_code && !category.get(row.role_code)!.permissions.includes(row.permission_code)) {
+        category.get(row.role_code)!.permissions.push(row.permission_code);
+      }
     }
     return groups;
   }, [matrix]);
@@ -187,39 +190,35 @@ export function AdminRolesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <motion.section
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="mesh-hero-bg overflow-hidden rounded-[2rem] border border-white/60 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-8"
-      >
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary-700 backdrop-blur-xl">
-              <ShieldCheck size={14} /> Governance & RBAC
-            </div>
-            <h1 className="text-3xl font-bold tracking-tight text-primary-950">Roles & Permissions</h1>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-              Assign constitutional, committee and ministry leadership while keeping technical administration separated by least privilege.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            <div className="surface-glass rounded-2xl px-4 py-3 text-center">
-              <div className="text-2xl font-bold text-primary-900">{roles?.length ?? 0}</div>
-              <div className="text-[11px] uppercase tracking-wide text-slate-500">Roles</div>
-            </div>
-            <div className="surface-glass rounded-2xl px-4 py-3 text-center">
-              <div className="text-2xl font-bold text-primary-900">{new Set(matrix.map((m) => m.permission_code)).size}</div>
-              <div className="text-[11px] uppercase tracking-wide text-slate-500">Permissions</div>
-            </div>
-            <div className="surface-glass col-span-2 rounded-2xl px-4 py-3 text-center sm:col-span-1">
-              <div className="text-2xl font-bold text-primary-900">{userRoles?.filter((r) => r.is_current).length ?? '—'}</div>
-              <div className="text-[11px] uppercase tracking-wide text-slate-500">Selected roles</div>
-            </div>
-          </div>
-        </div>
-      </motion.section>
+    <div className="space-y-6 pb-12">
+      {/* Header & Interactive Guide */}
+      <PageHeaderGuide
+        title="Roles, Governance & Permissions"
+        badge="Constitutional RBAC Engine"
+        subtitle="Assign constitutional, committee, and ministry leadership while strictly preserving least-privilege technical separation."
+        summarySteps={[
+          {
+            title: '1. Select Member',
+            description: 'Search for any active student or leader using their name, email, or admission number.',
+            badge: 'Search',
+          },
+          {
+            title: '2. Select Role & Scope',
+            description: 'Pick an executive office or ministry/committee role with automatic scope attachment.',
+            badge: 'Scoped Access',
+          },
+          {
+            title: '3. Instant Propagation',
+            description: 'Permissions update in real-time across navigation items, actions, and API security guards.',
+            badge: 'Live Matrix',
+          },
+        ]}
+        quickTips={[
+          'Ministry-scoped roles follow the selected ministry (e.g. Praise & Worship Leader, Missions Secretary).',
+          'Only Super Admins can manage System Administrators and IT Admin accounts.',
+          'Review the live Role Catalog below to inspect permissions granted to each constitutional role.',
+        ]}
+      />
 
       <Card variant="glass">
         <div className="mb-5 flex items-center justify-between gap-3">
@@ -264,8 +263,8 @@ export function AdminRolesPage() {
                         className="overflow-hidden"
                       >
                         <div className="grid gap-3 border-t border-white/60 p-4 lg:grid-cols-2">
-                          {Array.from(roleMap.values()).map(({ row, permissions }) => (
-                            <div key={row.role_code} className="rounded-2xl border border-white/70 bg-white/60 p-4 shadow-sm">
+                          {Array.from(roleMap.values()).map(({ row, permissions }, rowIdx) => (
+                            <div key={`${category}-${row.role_code}-${rowIdx}`} className="rounded-2xl border border-white/70 bg-white/60 p-4 shadow-sm">
                               <div className="flex items-start justify-between gap-3">
                                 <div>
                                   <div className="font-semibold text-primary-950">{row.role_name}</div>
@@ -278,8 +277,8 @@ export function AdminRolesPage() {
                               <div className="mt-3 flex flex-wrap gap-1.5">
                                 {permissions.length === 0 ? (
                                   <span className="text-xs text-slate-400">No permissions assigned.</span>
-                                ) : permissions.map((permission) => (
-                                  <span key={permission} className="rounded-full border border-primary-100 bg-primary-50/80 px-2 py-1 text-[10px] font-medium text-primary-800">
+                                ) : permissions.map((permission, permIdx) => (
+                                  <span key={`${row.role_code}-${permission}-${permIdx}`} className="rounded-full border border-primary-100 bg-primary-50/80 px-2 py-1 text-[10px] font-medium text-primary-800">
                                     {prettyPermission(permission)}
                                   </span>
                                 ))}
@@ -328,9 +327,9 @@ export function AdminRolesPage() {
                 {search.trim().length >= 2 && (
                   <div className="mt-4 flex flex-col gap-2">
                     {searchResults?.length === 0 && <p className="py-3 text-sm text-slate-400">No members found.</p>}
-                    {searchResults?.map((user) => (
+                    {searchResults?.map((user, uIdx) => (
                       <motion.button
-                        key={user.id}
+                        key={user.id || `user-${uIdx}`}
                         whileHover={{ y: -2 }}
                         whileTap={{ scale: 0.99 }}
                         onClick={() => setSelectedUser(user)}
@@ -385,8 +384,8 @@ export function AdminRolesPage() {
                     <p className="text-sm text-slate-400">No additional roles — this person is a plain Member.</p>
                   )}
                   <div className="flex flex-col gap-2">
-                    {userRoles?.filter((r) => r.is_current).map((r) => (
-                      <div key={r.id} className="flex items-center justify-between gap-3 rounded-2xl bg-primary-50/80 px-3 py-2.5 text-sm">
+                    {userRoles?.filter((r) => r.is_current).map((r, rIdx) => (
+                      <div key={r.id || `role-${rIdx}`} className="flex items-center justify-between gap-3 rounded-2xl bg-primary-50/80 px-3 py-2.5 text-sm">
                         <span className="text-primary-800">
                           {r.role_name}{r.scope_name && <span className="text-primary-500"> — {r.scope_name}</span>}
                         </span>
@@ -408,20 +407,20 @@ export function AdminRolesPage() {
                     className="rounded-2xl border border-white/70 bg-white/70 px-3.5 py-3 text-sm outline-none backdrop-blur-xl"
                   >
                     <option value="">Select a role...</option>
-                    {roles?.map((role) => <option key={role.id} value={role.id}>{role.name}</option>)}
+                    {roles?.map((role, rIdx) => <option key={role.id || `role-${rIdx}`} value={role.id}>{role.name}</option>)}
                   </select>
 
                   {needsMinistryScope && (
                     <select value={scopeId} onChange={(e) => setScopeId(e.target.value)} className="rounded-2xl border border-white/70 bg-white/70 px-3.5 py-3 text-sm outline-none">
                       <option value="">Select a ministry...</option>
-                      {ministries?.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+                      {ministries?.map((m, mIdx) => <option key={m.id || `min-${mIdx}`} value={m.id}>{m.name}</option>)}
                     </select>
                   )}
 
                   {needsCommitteeScope && (
                     <select value={scopeId} onChange={(e) => setScopeId(e.target.value)} className="rounded-2xl border border-white/70 bg-white/70 px-3.5 py-3 text-sm outline-none">
                       <option value="">Select a committee...</option>
-                      {committees?.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                      {committees?.map((c, cIdx) => <option key={c.id || `comm-${cIdx}`} value={c.id}>{c.name}</option>)}
                     </select>
                   )}
 

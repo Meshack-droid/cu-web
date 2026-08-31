@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'motion/react';
-import { ArrowLeft, CalendarDays, CheckCircle2, Church, Clock3, LogIn, Users, UserPlus, UserMinus, Sparkles } from 'lucide-react';
+import { ArrowLeft, CalendarDays, CheckCircle2, Church, Clock3, LogIn, Users, UserPlus, UserMinus, Sparkles, Home } from 'lucide-react';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { useAuthStore } from '@/store/auth.store';
@@ -91,7 +91,11 @@ export function MinistryDetailsPage() {
   return <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="overflow-hidden">
     <section className="mesh-hero-bg px-5 pb-16 pt-8 sm:px-6 lg:pb-20 lg:pt-12">
       <div className="page-shell">
-        <Link to="/ministries" className="inline-flex items-center gap-2 text-sm font-bold text-primary-700 hover:text-primary-500"><ArrowLeft size={16}/> All ministries</Link>
+        <div className="flex flex-wrap items-center gap-3 text-sm font-bold text-primary-700">
+          <Link to="/" className="inline-flex items-center gap-1.5 hover:text-primary-900 transition"><Home size={15}/> Home</Link>
+          <span className="text-slate-300 font-normal">/</span>
+          <Link to="/ministries" className="inline-flex items-center gap-1 hover:text-primary-900 transition">All ministries</Link>
+        </div>
         <div className="mt-8 grid gap-8 lg:grid-cols-[1.2fr_.8fr] lg:items-end">
           <div>
             <span className="eyebrow"><Sparkles size={14}/> {fallback.focus}</span>

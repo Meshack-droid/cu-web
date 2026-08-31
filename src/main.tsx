@@ -8,7 +8,11 @@ import App from './App';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 2,
+      retry: (failureCount, error: any) => {
+        const status = error?.response?.status;
+        if (status === 401 || status === 403) return false;
+        return failureCount < 2;
+      },
       staleTime: 10_000,
       refetchInterval: 15_000,
       refetchIntervalInBackground: false,

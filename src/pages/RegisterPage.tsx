@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
-import { HeartHandshake } from 'lucide-react';
+import { HeartHandshake, ArrowLeft, Home } from 'lucide-react';
 import { Card } from '@/components/Card';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
@@ -94,7 +94,18 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="mesh-hero-bg flex min-h-screen items-center justify-center px-6 py-16">
+    <div className="mesh-hero-bg flex min-h-screen flex-col items-center justify-center px-6 py-16">
+      <div className="w-full max-w-xl mb-4 flex items-center justify-between">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/70 px-3.5 py-1.5 text-xs font-bold text-slate-700 shadow-xs backdrop-blur-md hover:bg-white hover:text-primary-900 transition active:scale-95"
+        >
+          <ArrowLeft size={14} />
+          <Home size={14} className="text-primary-700" />
+          <span>Back to Home</span>
+        </Link>
+      </div>
+
       <Card variant="glass" className="w-full max-w-xl p-7 sm:p-9">
         {isFromVisitorCheckIn && (
           <div className="mb-6 flex items-start gap-3 rounded-2xl border border-primary-100 bg-primary-50/80 p-4 text-xs leading-5 text-primary-900 shadow-sm">

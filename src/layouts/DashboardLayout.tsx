@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate, Link } from 'react-router-dom';
 import {
   LayoutDashboard,
   Users,
@@ -17,6 +17,9 @@ import {
   Headphones,
   Sparkles,
   HelpCircle,
+  Home,
+  ArrowLeft,
+  ArrowRight,
 } from 'lucide-react';
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
@@ -158,8 +161,20 @@ function Sidebar({
         )}
       </motion.div>
 
-      {/* Quick Actions in Sidebar: Sunday QR + Guide */}
+      {/* Quick Actions in Sidebar: Sunday QR + Guide + Back to Home */}
       <div className="mb-4 space-y-2 px-1">
+        <Link
+          to="/"
+          onClick={onClose}
+          className="w-full flex items-center gap-2.5 rounded-2xl border border-slate-200/80 bg-white/90 px-3 py-2 text-xs font-bold text-slate-700 shadow-xs hover:bg-slate-50 hover:text-primary-900 transition active:scale-98"
+        >
+          <span className="grid h-6 w-6 place-items-center rounded-lg bg-primary-50 text-primary-700">
+            <Home size={14} />
+          </span>
+          <span className="truncate">Back to Home</span>
+          <ArrowRight size={14} className="ml-auto text-slate-400" />
+        </Link>
+
         <button
           onClick={() => {
             onClose?.();
@@ -327,6 +342,17 @@ export function DashboardLayout() {
               </div>
 
               <div className="ml-auto flex items-center gap-2 sm:gap-3">
+                {/* Back to Home Button */}
+                <Link
+                  to="/"
+                  className="flex items-center gap-1.5 rounded-xl border border-slate-200/80 bg-white/90 hover:bg-slate-50 px-2.5 sm:px-3 py-1.5 text-xs font-bold text-slate-700 shadow-xs transition active:scale-95"
+                >
+                  <ArrowLeft size={14} className="text-slate-500" />
+                  <Home size={14} className="text-primary-700" />
+                  <span className="hidden sm:inline">Back to Home</span>
+                  <span className="sm:hidden text-[11px]">Home</span>
+                </Link>
+
                 {/* Guide Button */}
                 <button
                   onClick={() => setIsGuideModalOpen(true)}

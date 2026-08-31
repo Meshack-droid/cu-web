@@ -69,12 +69,13 @@ export function createApp() {
   // ceiling than general API traffic regardless of the global limit above.
   const authRateLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 20,
+    max: 120,
+    skipSuccessfulRequests: true,
     standardHeaders: true,
     legacyHeaders: false,
     message: {
       success: false,
-      message: 'Too many authentication attempts. Please try again later.',
+      message: 'Too many failed authentication attempts. Please try again later.',
       data: null,
       errors: [{ code: 'RATE_LIMITED', message: 'Too many authentication attempts' }],
       meta: {},

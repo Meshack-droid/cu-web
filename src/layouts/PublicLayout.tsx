@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { Menu, X, ArrowUpRight } from 'lucide-react';
+import { Menu, X, ArrowUpRight, ArrowLeft, Home } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import tumcuLogo from '@/assets/tumcu-logo.png';
 
@@ -84,7 +84,21 @@ export function PublicLayout() {
         </div>
       </header>
 
-      <main><Outlet /></main>
+      <main>
+        {location.pathname !== '/' && (
+          <div className="page-shell pt-4 pb-1">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-3.5 py-1.5 text-xs font-bold text-slate-700 shadow-xs backdrop-blur-md hover:bg-white hover:text-primary-900 transition active:scale-95"
+            >
+              <ArrowLeft size={14} />
+              <Home size={14} className="text-primary-700" />
+              <span>Back to Home</span>
+            </Link>
+          </div>
+        )}
+        <Outlet />
+      </main>
 
       <footer className="relative overflow-hidden bg-primary-900 text-white">
         <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-gold-500/10 blur-3xl" />

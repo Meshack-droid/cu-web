@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CheckCircle2, Clock3, RefreshCw, Search, XCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { CheckCircle2, Clock3, RefreshCw, Search, Users, XCircle, ArrowRight } from 'lucide-react';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { useAuthStore } from '@/store/auth.store';
@@ -23,6 +24,7 @@ export function AdminApplicationsPage() {
   const [rejectionReason, setRejectionReason] = useState('');
   const [search, setSearch] = useState('');
   const [actionError, setActionError] = useState<string | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
   const { data: applications, isLoading, isFetching, isError, refetch } = useQuery({
     queryKey: ['membership', 'applications', 'pending'],
@@ -39,17 +41,26 @@ export function AdminApplicationsPage() {
       .includes(q);
   });
 
-  const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: ['membership', 'applications', 'pending'] });
+  const invalidate = async () => {
+    await queryClient.invalidateQueries({ queryKey: ['membership'] });
+    await queryClient.invalidateQueries({ queryKey: ['membership', 'applications'] });
+    await queryClient.invalidateQueries({ queryKey: ['membership', 'applications', 'pending'] });
+    await queryClient.invalidateQueries({ queryKey: ['membership', 'all'] });
+  };
 
   const approveMutation = useMutation({
     mutationFn: approveApplication,
-    onSuccess: async () => {
+    onSuccess: async (data, applicationId) => {
+      const applicant = applications?.find((a) => a.id === applicationId);
+      const name = applicant?.full_name || 'The applicant';
       setActionError(null);
+      setActionSuccess(`${name} was approved, assigned membership number ${data?.membership_number || 'TUMCU-2026-XXXX'}, and moved to the Members List.`);
       await invalidate();
-      await queryClient.invalidateQueries({ queryKey: ['membership', 'applications'] });
     },
-    onError: (error) => setActionError(getErrorMessage(error, 'The application could not be approved.')),
+    onError: (error) => {
+      setActionSuccess(null);
+      setActionError(getErrorMessage(error, 'The application could not be approved.'));
+    },
   });
 
   const rejectMutation = useMutation({
@@ -58,9 +69,13 @@ export function AdminApplicationsPage() {
       setRejectingId(null);
       setRejectionReason('');
       setActionError(null);
+      setActionSuccess('The application has been rejected and removed from the queue.');
       await invalidate();
     },
-    onError: (error) => setActionError(getErrorMessage(error, 'The application could not be rejected.')),
+    onError: (error) => {
+      setActionSuccess(null);
+      setActionError(getErrorMessage(error, 'The application could not be rejected.'));
+    },
   });
 
   const busyId = approveMutation.isPending ? approveMutation.variables : rejectMutation.variables?.id;
@@ -74,13 +89,19 @@ export function AdminApplicationsPage() {
             <h1 className="mt-4 text-3xl font-black tracking-tight text-primary-950">Membership Applications</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
               Review new applications, approve eligible members and keep the membership queue current.
-              The queue refreshes automatically every 30 seconds.
+              Approved applicants are immediately transitioned from the waiting list to the official registered members list.
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <Link
+              to="/dashboard/membership"
+              className="inline-flex items-center gap-2 rounded-2xl bg-white/80 px-4 py-3 text-xs font-bold text-primary-950 shadow-sm backdrop-blur-xl transition hover:bg-white"
+            >
+              <Users size={15} className="text-primary-700" /> View Members List <ArrowRight size={14} />
+            </Link>
             <div className="rounded-2xl bg-white/60 px-4 py-3 text-center backdrop-blur-xl">
               <div className="text-2xl font-black text-primary-950">{applications?.length ?? 0}</div>
-              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Pending</div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Waiting List</div>
             </div>
             <Button variant="secondary" className="gap-2" onClick={() => void refetch()} disabled={isFetching}>
               <RefreshCw size={15} className={isFetching ? 'animate-spin' : ''} /> Refresh
@@ -88,6 +109,28 @@ export function AdminApplicationsPage() {
           </div>
         </div>
       </section>
+
+      {actionSuccess && (
+        <div className="flex items-center justify-between gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/90 px-4 py-3.5 text-sm font-medium text-emerald-900 shadow-sm">
+          <div className="flex items-center gap-2.5">
+            <CheckCircle2 size={18} className="shrink-0 text-emerald-600" />
+            <span>{actionSuccess}</span>
+          </div>
+          <Link
+            to="/dashboard/membership"
+            className="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 underline hover:text-emerald-950"
+          >
+            Go to Members List →
+          </Link>
+        </div>
+      )}
+
+      {actionError && (
+        <div className="flex items-center gap-2.5 rounded-2xl border border-red-200 bg-red-50/80 px-4 py-3 text-sm text-red-700">
+          <XCircle size={18} className="shrink-0 text-red-600" />
+          <span>{actionError}</span>
+        </div>
+      )}
 
       <Card variant="glass">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -105,12 +148,6 @@ export function AdminApplicationsPage() {
           </span>
         </div>
       </Card>
-
-      {actionError && (
-        <div className="rounded-2xl border border-red-200 bg-red-50/80 px-4 py-3 text-sm text-red-700">
-          {actionError}
-        </div>
-      )}
 
       {isLoading && (
         <div className="animate-pulse space-y-3">

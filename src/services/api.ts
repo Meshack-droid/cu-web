@@ -40,19 +40,39 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const original = error.config as RetryConfig | undefined;
 
-    if (error.response?.status !== 401 || !original || original._retry) {
+    // Do not attempt to refresh if:
+    // 1. Not a 401
+    // 2. Request was already retried
+    // 3. Request was to /auth/login or /auth/refresh or /auth/register
+    const isAuthEndpoint =
+      original?.url?.includes('/auth/refresh') ||
+      original?.url?.includes('/auth/login') ||
+      original?.url?.includes('/auth/register');
+
+    if (error.response?.status !== 401 || !original || original._retry || isAuthEndpoint) {
+      if (isAuthEndpoint && error.response?.status === 401 && original?.url?.includes('/auth/refresh')) {
+        useAuthStore.getState().logout();
+      }
       return Promise.reject(error);
     }
 
     original._retry = true;
 
     try {
-      refreshPromise ??= refreshAccessToken().finally(() => {
-        refreshPromise = null;
-      });
+      if (!refreshPromise) {
+        refreshPromise = refreshAccessToken().finally(() => {
+          refreshPromise = null;
+        });
+      }
 
       const accessToken = await refreshPromise;
-      original.headers.Authorization = `Bearer ${accessToken}`;
+      if (original.headers) {
+        if (typeof (original.headers as any).set === 'function') {
+          (original.headers as any).set('Authorization', `Bearer ${accessToken}`);
+        } else {
+          (original.headers as any).Authorization = `Bearer ${accessToken}`;
+        }
+      }
       return api(original);
     } catch (refreshError) {
       useAuthStore.getState().logout();
