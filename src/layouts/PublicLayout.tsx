@@ -9,10 +9,6 @@ const navLinks = [
   { to: '/about', label: 'About' },
   { to: '/ministries', label: 'Ministries' },
   { to: '/events', label: 'Events' },
-  { to: '/membership', label: 'Membership' },
-  { to: '/constitution', label: 'Constitution' },
-  { to: '/resources', label: 'Resources' },
-  { to: '/elections', label: 'Elections' },
   { to: '/contact', label: 'Contact' },
 ];
 

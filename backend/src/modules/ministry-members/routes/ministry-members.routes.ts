@@ -18,6 +18,7 @@ router.use(authenticate, loadPermissions);
 // Self-service ministry connection is available to admitted active members;
 // it does not grant management privileges or change RBAC roles.
 router.post('/join', ministrySelfController.join);
+router.get('/my-ministries', ministrySelfController.listMine);
 router.get('/mine/:ministryId', ministrySelfController.get);
 router.delete('/mine/:ministryId', ministrySelfController.leave);
 

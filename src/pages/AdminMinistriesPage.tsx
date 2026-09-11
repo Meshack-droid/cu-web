@@ -17,12 +17,15 @@ import {
   Users,
   AlertCircle,
   X,
+  Camera,
 } from 'lucide-react';
 import { api } from '@/services/api';
 import { useAuthStore } from '@/store/auth.store';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Input } from '@/components/Input';
+import { MinistryBackgroundModal } from '@/components/MinistryBackgroundModal';
+import { getMinistryBackground } from '@/features/ministries/ministries.api';
 
 interface Ministry {
   id: string;
@@ -238,6 +241,7 @@ export function AdminMinistriesPage() {
     },
   ]);
   const [submittingLeader, setSubmittingLeader] = useState(false);
+  const [bgModalMinistry, setBgModalMinistry] = useState<any>(null);
 
   useEffect(() => {
     fetchMinistries();
@@ -405,8 +409,15 @@ export function AdminMinistriesPage() {
                 </span>
                 <div className="flex items-center gap-1">
                   <button
+                    onClick={() => setBgModalMinistry(m)}
+                    title="Change Background Photo"
+                    className="p-1 rounded-lg text-amber-600 hover:text-amber-800 hover:bg-amber-50 transition"
+                  >
+                    <Camera size={13} />
+                  </button>
+                  <button
                     onClick={() => handleOpenEdit(m)}
-                    className="p-1 rounded-lg text-slate-400 hover:text-primary-900 hover:bg-slate-50"
+                    className="p-1 rounded-lg text-slate-400 hover:text-primary-900 hover:bg-slate-50 transition"
                   >
                     <Edit2 size={13} />
                   </button>
@@ -451,6 +462,16 @@ export function AdminMinistriesPage() {
                   <UserCheck size={12} className="mr-1" /> Assign / Vet
                 </Button>
               </div>
+
+              {/* Background Photo Action Button */}
+              <button
+                type="button"
+                onClick={() => setBgModalMinistry(m)}
+                className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl border border-amber-200/90 bg-amber-50/70 hover:bg-amber-100 text-amber-950 text-xs font-bold transition active:scale-98"
+              >
+                <Camera size={13} className="text-amber-700" />
+                <span>Change Background Photo</span>
+              </button>
             </div>
           </Card>
         ))}
@@ -640,6 +661,18 @@ export function AdminMinistriesPage() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Super Admin Ministry Background Customization Modal */}
+      {bgModalMinistry && (
+        <MinistryBackgroundModal
+          isOpen={Boolean(bgModalMinistry)}
+          onClose={() => setBgModalMinistry(null)}
+          ministry={bgModalMinistry}
+          onSaved={() => {
+            fetchMinistries();
+          }}
+        />
+      )}
     </div>
   );
 }

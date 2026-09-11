@@ -177,9 +177,21 @@ export function PrayerPage() {
       )}
 
       {!isLoading && requests?.length === 0 && (
-        <Card variant="glass" className="p-8 text-center text-sm text-slate-500">
-          <HandHeart size={32} className="mx-auto mb-2 text-slate-400" />
-          No prayer requests yet. Be the first to share one.
+        <Card variant="glass" className="p-8 sm:p-12 text-center max-w-md mx-auto space-y-3 border border-emerald-100 bg-white/90 shadow-xs">
+          <div className="grid h-12 w-12 place-items-center rounded-2xl bg-[#EAF5EF] text-[#006633] mx-auto">
+            <HandHeart size={24} />
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-[#17201B]">Your prayer space is quiet.</h3>
+            <p className="text-xs text-[#68736C] mt-1 leading-relaxed">
+              When something is on your heart, we're here to pray with you.
+            </p>
+          </div>
+          <div className="pt-2">
+            <NewRequestForm
+              onSubmitted={() => queryClient.invalidateQueries({ queryKey: ['prayer-requests'] })}
+            />
+          </div>
         </Card>
       )}
 

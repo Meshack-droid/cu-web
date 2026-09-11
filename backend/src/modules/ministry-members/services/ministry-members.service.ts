@@ -88,4 +88,33 @@ export class MinistryMembersService extends BaseService<MinistryMember> {
     );
     return rows[0] ?? null;
   }
+
+  async listMyMinistries(userId: string) {
+    const membershipRows = await query<any[]>(
+      `SELECT id, ministry_id, position, start_date, end_date
+         FROM ministry_members
+        WHERE user_id = :userId
+          AND (end_date IS NULL OR end_date >= CURDATE())
+        ORDER BY start_date DESC`,
+      { userId }
+    );
+    const rows = Array.isArray(membershipRows) ? membershipRows : [];
+    if (rows.length === 0) return [];
+
+    const ministryRows = await query<any[]>(`SELECT id, code, name, description FROM ministries`, {});
+    const allMinistries = Array.isArray(ministryRows) ? ministryRows : [];
+
+    return rows.map((mm) => {
+      const min = allMinistries.find((m) => m.id === mm.ministry_id || m.code === mm.ministry_id);
+      return {
+        id: mm.id,
+        ministry_id: mm.ministry_id,
+        ministry_name: min ? min.name : 'TUMCU Ministry',
+        ministry_code: min ? min.code : '',
+        description: min ? min.description : '',
+        position: mm.position || 'member',
+        start_date: mm.start_date,
+      };
+    });
+  }
 }

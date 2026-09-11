@@ -27,4 +27,9 @@ export const ministrySelfController = {
     const result = await service.myMembership(req.user.sub, req.params.ministryId);
     return sendSuccess(res, result, 'Your ministry membership retrieved');
   }),
+  listMine: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) throw new AuthenticationError();
+    const result = await service.listMyMinistries(req.user.sub);
+    return sendSuccess(res, result, 'Your active ministry memberships retrieved');
+  }),
 };

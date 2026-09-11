@@ -23,9 +23,13 @@ import { SermonsResourcesPage } from '@/pages/SermonsResourcesPage';
 import { ConstitutionPage } from '@/pages/ConstitutionPage';
 import { FinancePage } from '@/pages/FinancePage';
 import { MeetingsPage } from '@/pages/MeetingsPage';
+import { CalendarPage } from '@/pages/CalendarPage';
 import { AttendancePage } from '@/pages/AttendancePage';
 import { PublicCheckInPage } from '@/pages/PublicCheckInPage';
 import { PrayerPage } from '@/pages/PrayerPage';
+import { TumcuHubPage } from '@/pages/TumcuHubPage';
+import { MorePage } from '@/pages/MorePage';
+import { AdminCenterPage } from '@/pages/AdminCenterPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { GeminiCompanionModal } from '@/components/GeminiCompanionModal';
 
@@ -57,8 +61,10 @@ export default function App() {
         <Route element={<RequireAuth />}>
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<DashboardOverviewPage />} />
+            <Route path="/dashboard/tumcu" element={<TumcuHubPage />} />
             <Route path="/dashboard/membership" element={<MembershipPage />} />
-            <Route path="/dashboard/meetings" element={<MeetingsPage />} />
+            <Route path="/dashboard/calendar" element={<CalendarPage />} />
+            <Route path="/dashboard/meetings" element={<CalendarPage />} />
             <Route path="/dashboard/attendance" element={<AttendancePage />} />
             <Route path="/dashboard/ministry-portal" element={<MinistryLeaderPortalPage />} />
             <Route path="/dashboard/elections" element={<ElectionsPage />} />
@@ -67,6 +73,8 @@ export default function App() {
             <Route path="/dashboard/sermons" element={<SermonsResourcesPage />} />
             <Route path="/dashboard/prayer" element={<PrayerPage />} />
             <Route path="/dashboard/finance" element={<FinancePage />} />
+            <Route path="/dashboard/more" element={<MorePage />} />
+            <Route path="/dashboard/admin" element={<AdminCenterPage />} />
 
             {/* Admin — permission-gated (Chapter 53) */}
             <Route element={<RequirePermission permission="membership.review" />}>

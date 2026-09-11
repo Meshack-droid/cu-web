@@ -55,4 +55,38 @@ export const adminController = {
     await service.revokeRole(req.params.id, req.user.sub);
     return sendSuccess(res, null, 'Role assignment ended');
   }),
+
+  getDashboardSummary: asyncHandler(async (_req: Request, res: Response) => {
+    const summary = await service.getDashboardSummary();
+    return sendSuccess(res, summary, 'Administration dashboard summary retrieved');
+  }),
+
+  getSystemHealth: asyncHandler(async (_req: Request, res: Response) => {
+    const health = await service.getSystemHealth();
+    return sendSuccess(res, health, 'System health diagnostics retrieved');
+  }),
+
+  listCustomCommittees: asyncHandler(async (_req: Request, res: Response) => {
+    const committees = await service.listCustomCommittees();
+    return sendSuccess(res, committees, 'Custom committees retrieved');
+  }),
+
+  createCustomCommittee: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) throw new AuthenticationError();
+    const result = await service.createCustomCommittee(req.body);
+    return sendSuccess(res, result, 'Custom committee commissioned successfully', 201);
+  }),
+
+  listFinanceResolutions: asyncHandler(async (_req: Request, res: Response) => {
+    const resolutions = await service.listFinanceResolutions();
+    return sendSuccess(res, resolutions, 'Finance resolutions retrieved');
+  }),
+
+  signFinanceResolution: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) throw new AuthenticationError();
+    const { signatoryName } = req.body || { signatoryName: 'Executive Signatory' };
+    const result = await service.signFinanceResolution(req.params.id, signatoryName);
+    return sendSuccess(res, result, 'Finance resolution signed and updated');
+  }),
 };
+

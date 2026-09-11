@@ -1,433 +1,361 @@
 import { NavLink, Outlet, useLocation, useNavigate, Link } from 'react-router-dom';
 import {
-  LayoutDashboard,
-  Users,
-  Church,
-  CalendarDays,
-  QrCode,
-  HandHeart,
-  WalletCards,
-  LogOut,
-  ClipboardCheck,
-  ShieldCheck,
-  ChevronRight,
-  Menu,
-  X,
-  Vote,
-  Headphones,
-  Sparkles,
-  HelpCircle,
   Home,
-  ArrowLeft,
-  ArrowRight,
-  Scale,
+  Church,
+  Users,
+  HandHeart,
+  MoreHorizontal,
+  ShieldCheck,
+  LogOut,
+  ExternalLink,
+  HelpCircle,
+  ChevronDown,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useAuthStore } from '@/store/auth.store';
 import { NotificationBell } from '@/components/NotificationBell';
 import tumcuLogo from '@/assets/tumcu-logo.png';
 import { logout as logoutApi } from '@/features/auth/auth.api';
-import { SundayServiceQrModal } from '@/components/SundayServiceQrModal';
 import { PortalGuideModal } from '@/components/PortalGuideModal';
+import { useQuery } from '@tanstack/react-query';
+import { fetchPendingApplications } from '@/features/membership/membership.api';
 
-const memberLinks = [
-  { to: '/dashboard', label: 'Overview', icon: LayoutDashboard, end: true },
+// Core 5 member navigation items as requested
+const coreNavItems = [
+  { to: '/dashboard', label: 'Home', icon: Home, end: true },
+  { to: '/dashboard/tumcu', label: 'TUMCU', icon: Church },
   { to: '/dashboard/membership', label: 'Membership', icon: Users },
-  { to: '/dashboard/meetings', label: 'Meetings & Events', icon: CalendarDays },
-  { to: '/dashboard/attendance', label: 'Attendance & QR', icon: QrCode },
-  { to: '/dashboard/ministry-portal', label: 'Ministry Leader Hub', icon: Church },
-  { to: '/dashboard/elections', label: 'Elections & Ballot', icon: Vote },
-  { to: '/dashboard/constitution', label: 'Constitution 2024', icon: Scale },
-  { to: '/dashboard/sermons', label: 'Sermons & Giving', icon: Headphones },
-  { to: '/dashboard/prayer', label: 'Prayer Requests', icon: HandHeart },
-  { to: '/dashboard/finance', label: 'Finance & Requests', icon: WalletCards },
+  { to: '/dashboard/prayer', label: 'Prayer', icon: HandHeart },
+  { to: '/dashboard/more', label: 'More', icon: MoreHorizontal },
 ];
 
-const adminLinks = [
-  { to: '/dashboard/admin/applications', label: 'Membership Applications', icon: ClipboardCheck, permission: 'membership.review' },
-  { to: '/dashboard/admin/ministries', label: 'Ministries Management', icon: Church, permission: ['leadership.assign', 'system.manage_roles'] },
-  { to: '/dashboard/admin/roles', label: 'Roles & Leadership', icon: ShieldCheck, permission: ['leadership.assign', 'system.manage_roles'] },
-  { to: '/dashboard/elections', label: 'Elections Oversight', icon: Vote, permission: ['leadership.assign', 'system.manage_roles'] },
-];
-
-function NavigationLink({
-  to,
-  label,
-  icon: Icon,
-  end,
-  onNavigate,
-}: {
-  to: string;
-  label: string;
-  icon: typeof LayoutDashboard;
-  end?: boolean;
-  onNavigate?: () => void;
-}) {
-  return (
-    <NavLink
-      to={to}
-      end={end}
-      onClick={onNavigate}
-      className={({ isActive }) =>
-        `group relative flex items-center gap-3 rounded-2xl px-3.5 py-3 text-sm font-semibold transition-all duration-200 ${
-          isActive
-            ? 'bg-primary-900 text-white shadow-lg shadow-primary-900/15'
-            : 'text-slate-600 hover:bg-white/80 hover:text-primary-900 hover:shadow-sm'
-        }`
-      }
-    >
-      {({ isActive }) => (
-        <>
-          <motion.span
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl transition-colors ${
-              isActive ? 'bg-white/15 text-white' : 'bg-slate-100/70 text-slate-600 group-hover:bg-primary-50 group-hover:text-primary-800'
-            }`}
-          >
-            <Icon size={17} />
-          </motion.span>
-          <span className="min-w-0 flex-1 truncate">{label}</span>
-          {isActive && (
-            <motion.span
-              initial={{ opacity: 0, x: -4 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <ChevronRight size={15} className="opacity-80" />
-            </motion.span>
-          )}
-        </>
-      )}
-    </NavLink>
-  );
-}
-
-function Sidebar({
-  mobile = false,
-  onClose,
-  onOpenSundayQr,
-  onOpenGuide,
-}: {
-  mobile?: boolean;
-  onClose?: () => void;
-  onOpenSundayQr?: () => void;
-  onOpenGuide?: () => void;
-}) {
+export function DashboardLayout() {
+  const [isGuideModalOpen, setIsGuideModalOpen] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const { user, roles, logout, hasPermission } = useAuthStore();
-  const visibleAdminLinks = adminLinks.filter(({ permission }) => Array.isArray(permission) ? permission.some((code) => hasPermission(code)) : hasPermission(permission));
+  const location = useLocation();
+  const { user, logout, roles, permissions } = useAuthStore();
+  const isSuperAdminState = useAuthStore((s) => s.isSuperAdmin());
+
+  const isSuperAdmin =
+    isSuperAdminState ||
+    user?.role === 'super_admin' ||
+    user?.role === 'system_admin' ||
+    user?.role === 'chairperson' ||
+    user?.role === 'secretary' ||
+    String(user?.email || '').toLowerCase().trim() === 'meshackokoth436@gmail.com' ||
+    String(user?.email || '').toLowerCase().trim() === 'admin@tumcu.ac.ke' ||
+    roles.some((r) => ['super_admin', 'system_admin', 'chairperson', 'secretary'].includes(r.code)) ||
+    permissions.includes('*') ||
+    permissions.includes('system.manage_roles');
+
+  const { data: pendingApps = [] } = useQuery({
+    queryKey: ['membership', 'applications', 'pending'],
+    queryFn: fetchPendingApplications,
+    enabled: Boolean(isSuperAdmin),
+  });
+
+  // Close profile dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setProfileDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   async function signOut() {
     const refreshToken = useAuthStore.getState().refreshToken;
     try {
       if (refreshToken) await logoutApi(refreshToken);
     } catch {
-      // The local session is still cleared if the server is unavailable.
+      // Local session cleared regardless
     } finally {
       logout();
       navigate('/login');
-      onClose?.();
     }
   }
 
-  return (
-    <aside className={`${mobile ? 'flex h-full w-[min(88vw,340px)]' : 'hidden w-[280px] lg:flex'} flex-col border-r border-white/70 bg-white/65 p-4 shadow-[12px_0_45px_rgba(15,23_42,.05)] backdrop-blur-2xl`}>
-      <motion.div
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="mb-6 flex items-center gap-3 px-2"
-      >
-        <motion.img
-          whileHover={{ rotate: 5, scale: 1.05 }}
-          transition={{ type: 'spring', stiffness: 300 }}
-          src={tumcuLogo}
-          alt="TUMCU seal"
-          className="h-11 w-11 rounded-full bg-white p-1 shadow-sm"
-        />
-        <div className="min-w-0 flex-1 leading-tight">
-          <div className="font-black tracking-wide text-primary-950">TUMCU</div>
-          <div className="truncate text-[11px] font-medium text-slate-500">Christian Union Portal</div>
-        </div>
-        {mobile && (
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={onClose}
-            className="rounded-xl p-2 text-slate-500 hover:bg-white"
-            aria-label="Close navigation"
-          >
-            <X size={18} />
-          </motion.button>
-        )}
-      </motion.div>
-
-      {/* Quick Actions in Sidebar: Sunday QR + Guide + Back to Home */}
-      <div className="mb-4 space-y-2 px-1">
-        <Link
-          to="/"
-          onClick={onClose}
-          className="w-full flex items-center gap-2.5 rounded-2xl border border-slate-200/80 bg-white/90 px-3 py-2 text-xs font-bold text-slate-700 shadow-xs hover:bg-slate-50 hover:text-primary-900 transition active:scale-98"
-        >
-          <span className="grid h-6 w-6 place-items-center rounded-lg bg-primary-50 text-primary-700">
-            <Home size={14} />
-          </span>
-          <span className="truncate">Back to Home</span>
-          <ArrowRight size={14} className="ml-auto text-slate-400" />
-        </Link>
-
-        {/* Sunday Service QR: Only shown for Super Admin */}
-        {(user?.role === 'super_admin' || user?.role === 'admin') && (
-          <button
-            onClick={() => {
-              onClose?.();
-              onOpenSundayQr?.();
-            }}
-            className="w-full flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 px-3.5 py-2.5 text-xs font-black text-slate-950 shadow-md shadow-amber-500/20 hover:from-amber-400 hover:to-amber-500 transition active:scale-98"
-          >
-            <span className="grid h-7 w-7 place-items-center rounded-xl bg-slate-950/10">
-              <QrCode size={16} />
-            </span>
-            <span className="truncate">Sunday Service QR</span>
-            <span className="ml-auto rounded-full bg-slate-950/15 px-2 py-0.5 text-[10px] font-bold">
-              Live
-            </span>
-          </button>
-        )}
-
-        <button
-          onClick={() => {
-            onClose?.();
-            onOpenGuide?.();
-          }}
-          className="w-full flex items-center gap-2.5 rounded-2xl border border-slate-200/80 bg-white/90 px-3 py-2 text-xs font-bold text-slate-700 shadow-xs hover:bg-slate-50 hover:text-primary-900 transition active:scale-98"
-        >
-          <span className="grid h-6 w-6 place-items-center rounded-lg bg-primary-50 text-primary-700">
-            <HelpCircle size={14} />
-          </span>
-          <span className="truncate">Portal Guide & Help</span>
-          <span className="ml-auto text-[10px] font-medium text-slate-400">Easy steps</span>
-        </button>
-      </div>
-
-      <nav className="flex-1 space-y-6 overflow-y-auto px-1">
-        <section>
-          <div className="mb-2 px-3 text-[10px] font-black uppercase tracking-[.2em] text-slate-400">My TUMCU</div>
-          <div className="space-y-1">
-            {memberLinks.map((link) => <NavigationLink key={link.to} to={link.to} label={link.label} icon={link.icon} end={link.end} onNavigate={onClose} />)}
-          </div>
-        </section>
-
-        {visibleAdminLinks.length > 0 && (
-          <section>
-            <div className="mb-2 px-3 text-[10px] font-black uppercase tracking-[.2em] text-slate-400">Administration</div>
-            <div className="space-y-1">
-              {visibleAdminLinks.map((link) => <NavigationLink key={link.to} to={link.to} label={link.label} icon={link.icon} onNavigate={onClose} />)}
-            </div>
-          </section>
-        )}
-      </nav>
-
-      <div className="mt-4 border-t border-slate-200/70 pt-4">
-        {roles.length > 0 && (
-          <div className="mb-3 flex flex-wrap gap-1.5 px-1">
-            {roles.slice(0, 3).map((role) => (
-              <span key={`${role.code}-${role.scope_id ?? 'global'}`} className="rounded-full bg-primary-50 px-2.5 py-1 text-[10px] font-black capitalize text-primary-700">
-                {role.name}{role.scope_type === 'ministry' ? ' · scoped' : ''}
-              </span>
-            ))}
-          </div>
-        )}
-        <motion.div
-          whileHover={{ scale: 1.01 }}
-          className="mb-2 flex items-center gap-3 rounded-2xl bg-white/60 p-3 shadow-sm transition-shadow hover:shadow-md"
-        >
-          <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary-900 font-black text-white shadow-sm">
-            {String(user?.full_name ?? 'M').charAt(0).toUpperCase()}
-          </div>
-          <div className="min-w-0">
-            <div className="truncate text-sm font-bold text-primary-950">{user?.full_name ?? 'Member'}</div>
-            <div className="truncate text-[11px] text-slate-500">{user?.email ?? ''}</div>
-          </div>
-        </motion.div>
-        <motion.button
-          whileHover={{ x: 2 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={signOut}
-          className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-sm font-semibold text-slate-500 transition hover:bg-red-50 hover:text-red-600"
-        >
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-slate-100/70 transition-colors group-hover:bg-red-100"><LogOut size={17} /></span>
-          Sign out
-        </motion.button>
-      </div>
-    </aside>
-  );
-}
-
-export function DashboardLayout() {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [isSundayQrOpen, setIsSundayQrOpen] = useState(false);
-  const [isGuideModalOpen, setIsGuideModalOpen] = useState(false);
-  const { user } = useAuthStore();
-  const location = useLocation();
+  const userInitial = String(user?.full_name ?? 'M').charAt(0).toUpperCase();
 
   return (
-    <div className="min-h-screen bg-[#f4f7f5]">
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <motion.div
-          animate={{
-            scale: [1, 1.08, 1],
-            x: [0, 15, 0],
-            y: [0, -10, 0],
-          }}
-          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute -left-32 top-0 h-72 w-72 rounded-full bg-primary-400/10 blur-3xl"
-        />
-        <motion.div
-          animate={{
-            scale: [1, 1.05, 1],
-            x: [0, -15, 0],
-            y: [0, 15, 0],
-          }}
-          transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute right-0 top-1/3 h-96 w-96 rounded-full bg-gold-300/10 blur-3xl"
-        />
-      </div>
-
-      <div className="flex min-h-screen">
-        <Sidebar
-          onOpenSundayQr={() => setIsSundayQrOpen(true)}
-          onOpenGuide={() => setIsGuideModalOpen(true)}
-        />
-
-        <AnimatePresence>
-          {mobileOpen && (
-            <div className="fixed inset-0 z-50 lg:hidden">
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm"
-                onClick={() => setMobileOpen(false)}
+    <div className="min-h-screen bg-[#F7F9F7] text-[#17201B] flex flex-col">
+      {/* Top Desktop & Mobile Header Bar */}
+      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur-md transition-all shadow-xs">
+        <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
+          {/* Brand Logo & Name */}
+          <div className="flex items-center gap-6">
+            <Link to="/dashboard" className="group flex items-center gap-2.5 transition active:scale-95">
+              <img
+                src={tumcuLogo}
+                alt="TUMCU Seal"
+                className="h-10 w-10 rounded-full bg-white p-0.5 shadow-xs ring-1 ring-emerald-900/10 transition group-hover:scale-105"
               />
-              <motion.div
-                initial={{ x: '-100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '-100%' }}
-                transition={{ type: 'spring', damping: 25, stiffness: 260 }}
-                className="relative h-full"
-              >
-                <Sidebar
-                  mobile
-                  onClose={() => setMobileOpen(false)}
-                  onOpenSundayQr={() => setIsSundayQrOpen(true)}
-                  onOpenGuide={() => setIsGuideModalOpen(true)}
-                />
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
-
-        <div className="min-w-0 flex-1">
-          <header className="sticky top-0 z-30 border-b border-white/70 bg-white/65 px-4 py-3 backdrop-blur-2xl sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between gap-4">
-              <motion.button
-                whileTap={{ scale: 0.92 }}
-                onClick={() => setMobileOpen(true)}
-                className="grid h-10 w-10 place-items-center rounded-xl bg-white text-primary-900 shadow-sm lg:hidden"
-                aria-label="Open navigation"
-              >
-                <Menu size={20} />
-              </motion.button>
-              <div className="hidden sm:block">
-                <p className="text-[10px] font-black uppercase tracking-[.2em] text-slate-400">Member portal</p>
-                <p className="text-sm font-bold text-primary-950">Welcome back, {String(user?.full_name ?? 'Member').split(/\s+/)[0]}</p>
+              <div className="leading-tight">
+                <span className="text-base font-black tracking-tight text-[#006633]">TUMCU</span>
+                <span className="hidden sm:block text-[10px] font-medium uppercase tracking-wider text-[#68736C]">
+                  Christian Union
+                </span>
               </div>
+            </Link>
 
-              <div className="ml-auto flex items-center gap-2 sm:gap-3">
-                {/* Back to Home Button */}
-                <Link
-                  to="/"
-                  className="flex items-center gap-1.5 rounded-xl border border-slate-200/80 bg-white/90 hover:bg-slate-50 px-2.5 sm:px-3 py-1.5 text-xs font-bold text-slate-700 shadow-xs transition active:scale-95"
+            {/* Desktop Horizontal Navigation (The 5 Core Links) */}
+            <nav className="hidden md:flex items-center gap-1.5 ml-2">
+              {coreNavItems.map(({ to, label, icon: Icon, end }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  end={end}
+                  className={({ isActive }) =>
+                    `group relative flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold transition-all duration-150 ${
+                      isActive
+                        ? 'bg-[#006633] text-white shadow-xs'
+                        : 'text-[#68736C] hover:bg-[#EAF5EF] hover:text-[#006633]'
+                    }`
+                  }
                 >
-                  <ArrowLeft size={14} className="text-slate-500" />
-                  <Home size={14} className="text-primary-700" />
-                  <span className="hidden sm:inline">Back to Home</span>
-                  <span className="sm:hidden text-[11px]">Home</span>
-                </Link>
+                  {({ isActive }) => (
+                    <>
+                      <Icon size={15} className={isActive ? 'text-white' : 'text-[#68736C] group-hover:text-[#006633]'} />
+                      <span>{label}</span>
+                    </>
+                  )}
+                </NavLink>
+              ))}
 
-                {/* Guide Button */}
-                <button
-                  onClick={() => setIsGuideModalOpen(true)}
-                  className="flex items-center gap-1.5 rounded-xl border border-slate-200/80 bg-white/90 hover:bg-slate-50 px-2.5 sm:px-3 py-1.5 text-xs font-bold text-slate-700 shadow-xs transition active:scale-95"
+              {/* Super Admin Center Quick Pill */}
+              {isSuperAdmin && (
+                <NavLink
+                  to="/dashboard/admin"
+                  className={({ isActive }) =>
+                    `flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition ${
+                      isActive
+                        ? 'bg-amber-400 text-slate-950 font-black shadow-xs'
+                        : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-200/60'
+                    }`
+                  }
                 >
-                  <HelpCircle size={15} className="text-primary-600" />
-                  <span className="hidden sm:inline">How it works</span>
-                </button>
+                  <ShieldCheck size={14} className="text-amber-700" />
+                  <span>Admin</span>
+                  {pendingApps.length > 0 && (
+                    <span className="rounded-full bg-amber-500 px-1.5 py-0.2 text-[10px] font-black text-white">
+                      {pendingApps.length}
+                    </span>
+                  )}
+                </NavLink>
+              )}
+            </nav>
+          </div>
 
-                {/* Header Sunday Service QR Button */}
-                <button
-                  onClick={() => setIsSundayQrOpen(true)}
-                  className="flex items-center gap-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 px-3 py-1.5 text-xs font-black text-slate-950 shadow-sm transition active:scale-95"
-                >
-                  <QrCode size={15} />
-                  <span className="hidden md:inline">Sunday Service QR</span>
-                </button>
+          {/* Right Controls: How it works, Public Link, Notification Bell, User Avatar */}
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            {/* Website Home Shortcut */}
+            <Link
+              to="/"
+              className="hidden lg:flex items-center gap-1 text-xs font-semibold text-[#68736C] hover:text-[#006633] px-2.5 py-1.5 rounded-lg hover:bg-slate-100 transition"
+              title="Visit Public Website"
+            >
+              <span>Website</span>
+              <ExternalLink size={12} />
+            </Link>
 
-                <NotificationBell />
-                <div className="hidden h-9 w-px bg-slate-200 sm:block" />
-                <div className="hidden text-right sm:block">
-                  <p className="text-xs font-bold text-primary-950">{user?.full_name ?? 'Member'}</p>
-                  <p className="text-[10px] text-slate-400">{user?.account_status ?? 'Active account'}</p>
+            {/* How it works */}
+            <button
+              onClick={() => setIsGuideModalOpen(true)}
+              className="hidden sm:flex items-center gap-1 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 px-2.5 py-1.5 text-xs font-semibold text-[#68736C] shadow-2xs transition active:scale-95"
+            >
+              <HelpCircle size={14} className="text-[#006633]" />
+              <span>Guide</span>
+            </button>
+
+            {/* Notification Bell with unread counter badge */}
+            <NotificationBell />
+
+            {/* Profile Avatar & Dropdown */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setProfileDropdownOpen((prev) => !prev)}
+                className="flex items-center gap-2 rounded-2xl border border-slate-200/80 bg-white p-1 pr-2 hover:bg-slate-50 transition active:scale-95 shadow-2xs"
+              >
+                <div className="grid h-8 w-8 place-items-center rounded-xl bg-[#006633] text-xs font-black text-white shadow-xs">
+                  {userInitial}
                 </div>
-                <motion.div
-                  whileHover={{ scale: 1.05, rotate: 2 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="grid h-10 w-10 place-items-center rounded-xl bg-primary-900 text-sm font-black text-white shadow-lg shadow-primary-900/20 cursor-pointer"
-                >
-                  {String(user?.full_name ?? 'M').charAt(0).toUpperCase()}
-                </motion.div>
-              </div>
+                <div className="hidden sm:block text-left">
+                  <p className="text-xs font-bold text-[#17201B] truncate max-w-[110px]">
+                    {String(user?.full_name ?? 'Member').split(/\s+/)[0]}
+                  </p>
+                </div>
+                <ChevronDown size={14} className="text-[#68736C] hidden sm:block" />
+              </button>
+
+              {/* Profile Dropdown Menu */}
+              <AnimatePresence>
+                {profileDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 4, scale: 0.96 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 mt-2 w-56 rounded-2xl border border-slate-200/90 bg-white p-2 shadow-xl backdrop-blur-md z-50 text-xs"
+                  >
+                    <div className="border-b border-slate-100 p-2.5">
+                      <p className="font-bold text-[#17201B] truncate">{user?.full_name ?? 'Member'}</p>
+                      <p className="text-[11px] text-[#68736C] truncate">{user?.email}</p>
+                      <div className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-[#EAF5EF] px-2 py-0.5 text-[10px] font-bold text-[#006633]">
+                        ✓ Active Account
+                      </div>
+                    </div>
+
+                    <div className="py-1">
+                      <Link
+                        to="/dashboard/membership"
+                        onClick={() => setProfileDropdownOpen(false)}
+                        className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 font-semibold text-[#17201B] hover:bg-slate-50 transition"
+                      >
+                        <Users size={14} className="text-[#68736C]" />
+                        <span>My Membership Card</span>
+                      </Link>
+
+                      <Link
+                        to="/dashboard/more"
+                        onClick={() => setProfileDropdownOpen(false)}
+                        className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 font-semibold text-[#17201B] hover:bg-slate-50 transition"
+                      >
+                        <MoreHorizontal size={14} className="text-[#68736C]" />
+                        <span>More Settings & Finance</span>
+                      </Link>
+
+                      {isSuperAdmin && (
+                        <div className="mt-1 pt-1 border-t border-amber-200/60 bg-amber-50/60 rounded-xl p-1.5 space-y-1">
+                          <div className="flex items-center justify-between px-1.5 text-[10px] font-black uppercase tracking-wider text-amber-900">
+                            <span>Super Admin Console</span>
+                            <span className="bg-amber-400 text-slate-950 px-1 py-0.2 rounded text-[9px]">Executive</span>
+                          </div>
+                          <Link
+                            to="/dashboard/admin"
+                            onClick={() => setProfileDropdownOpen(false)}
+                            className="flex items-center gap-2 rounded-lg px-2 py-1.5 font-bold text-amber-950 hover:bg-amber-100 transition"
+                          >
+                            <ShieldCheck size={14} className="text-amber-700" />
+                            <span>Super Admin Center</span>
+                          </Link>
+                          <Link
+                            to="/dashboard/admin?tab=ministries"
+                            onClick={() => setProfileDropdownOpen(false)}
+                            className="flex items-center gap-2 rounded-lg px-2 py-1.5 font-bold text-amber-950 hover:bg-amber-100 transition text-[11px]"
+                          >
+                            <Church size={14} className="text-amber-700" />
+                            <span>Ministry Backgrounds</span>
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="border-t border-slate-100 pt-1">
+                      <button
+                        onClick={() => {
+                          setProfileDropdownOpen(false);
+                          signOut();
+                        }}
+                        className="flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 font-bold text-red-600 hover:bg-red-50 transition text-left"
+                      >
+                        <LogOut size={14} />
+                        <span>Sign out</span>
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-          </header>
-
-          <main className="mx-auto w-full max-w-[1500px] p-4 pb-24 sm:p-6 lg:p-8 lg:pb-10">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={location.pathname}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <Outlet />
-              </motion.div>
-            </AnimatePresence>
-          </main>
+          </div>
         </div>
-      </div>
+      </header>
 
-      {/* Sunday Service QR Code Modal */}
-      {isSundayQrOpen && (
-        <SundayServiceQrModal onClose={() => setIsSundayQrOpen(false)} />
-      )}
+      {/* Main App Canvas */}
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6 md:pb-12 pb-24">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+          >
+            <Outlet />
+          </motion.div>
+        </AnimatePresence>
+      </main>
+
+      {/* Mobile Bottom Navigation Bar (Fixed 5-item touch navigation) */}
+      <nav className="fixed inset-x-0 bottom-0 z-40 md:hidden border-t border-slate-200/90 bg-white/95 backdrop-blur-lg px-2 py-1.5 shadow-lg">
+        <div className="flex items-center justify-around">
+          {coreNavItems.map(({ to, label, icon: Icon, end }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              className={({ isActive }) =>
+                `flex flex-col items-center justify-center gap-1 rounded-xl px-3 py-1.5 text-[10px] font-bold transition active:scale-95 ${
+                  isActive
+                    ? 'text-[#006633]'
+                    : 'text-[#68736C] hover:text-[#17201B]'
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <span
+                    className={`grid h-7 w-7 place-items-center rounded-lg transition ${
+                      isActive ? 'bg-[#EAF5EF] text-[#006633]' : 'text-[#68736C]'
+                    }`}
+                  >
+                    <Icon size={16} />
+                  </span>
+                  <span className="tracking-tight">{label}</span>
+                </>
+              )}
+            </NavLink>
+          ))}
+
+          {isSuperAdmin && (
+            <NavLink
+              to="/dashboard/admin"
+              className={({ isActive }) =>
+                `flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-1.5 text-[10px] font-bold transition active:scale-95 ${
+                  isActive
+                    ? 'text-amber-600'
+                    : 'text-amber-800 hover:text-amber-950'
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <span
+                    className={`grid h-7 w-7 place-items-center rounded-lg transition relative ${
+                      isActive ? 'bg-amber-100 text-amber-900 ring-1 ring-amber-400' : 'bg-amber-50 text-amber-700'
+                    }`}
+                  >
+                    <ShieldCheck size={16} />
+                    {pendingApps.length > 0 && (
+                      <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-amber-500 text-[9px] font-black text-white grid place-items-center">
+                        {pendingApps.length}
+                      </span>
+                    )}
+                  </span>
+                  <span className="tracking-tight font-black">Admin</span>
+                </>
+              )}
+            </NavLink>
+          )}
+        </div>
+      </nav>
 
       {/* Portal Guide Modal */}
-      <PortalGuideModal
-        isOpen={isGuideModalOpen}
-        onClose={() => setIsGuideModalOpen(false)}
-      />
-
-      <nav className="fixed inset-x-3 bottom-3 z-40 flex items-center justify-around rounded-2xl border border-white/70 bg-white/90 p-2 shadow-2xl backdrop-blur-xl lg:hidden">
-        {memberLinks.slice(0, 4).map(({ to, label, icon: Icon, end }) => (
-          <NavLink key={to} to={to} end={end} className={({ isActive }) => `flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl px-2 py-2 text-[10px] font-bold transition-transform active:scale-95 ${isActive ? 'bg-primary-900 text-white shadow-md' : 'text-slate-500'}`}>
-            <Icon size={17} />
-            <span className="truncate">{label === 'Meetings & Events' ? 'Events' : label}</span>
-          </NavLink>
-        ))}
-      </nav>
+      <PortalGuideModal isOpen={isGuideModalOpen} onClose={() => setIsGuideModalOpen(false)} />
     </div>
   );
 }

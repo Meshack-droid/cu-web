@@ -21,33 +21,24 @@ import {
   type ExpenseRequest,
 } from '@/features/finance/finance.api';
 
+const STATUS_DISPLAY: Record<ExpenseRequest['status'], { label: string; color: string }> = {
+  requested: { label: 'Pending Treasurer Review', color: 'bg-amber-50 text-amber-800 border-amber-200' },
+  treasurer_reviewed: { label: 'Pending Secretary Verification', color: 'bg-blue-50 text-blue-800 border-blue-200' },
+  secretary_verified: { label: 'Pending Chairperson Approval', color: 'bg-indigo-50 text-indigo-800 border-indigo-200' },
+  chairperson_approved: { label: 'Pending Payment', color: 'bg-purple-50 text-purple-800 border-purple-200' },
+  paid: { label: 'Awaiting Receipt', color: 'bg-teal-50 text-teal-800 border-teal-200' },
+  receipted: { label: 'Pending Audit', color: 'bg-orange-50 text-orange-800 border-orange-200' },
+  audited: { label: 'Audit Completed', color: 'bg-emerald-50 text-emerald-800 border-emerald-200' },
+  rejected: { label: 'Request Rejected', color: 'bg-red-50 text-red-700 border-red-200' },
+};
+
 function ApprovalTrail({ status }: { status: ExpenseRequest['status'] }) {
-  if (status === 'rejected') {
-    return (
-      <div className="flex items-center gap-1.5 text-xs font-bold text-red-600">
-        <XCircle size={14} /> Rejected by Executive
-      </div>
-    );
-  }
-  const currentIndex = APPROVAL_STEPS.findIndex((s) => s.status === status);
+  const meta = STATUS_DISPLAY[status] || { label: status, color: 'bg-slate-100 text-slate-700 border-slate-200' };
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
-      {APPROVAL_STEPS.map((step, i) => {
-        const isDoneOrCurrent = i <= currentIndex;
-        return (
-          <div key={step.status} className="flex items-center gap-1.5">
-            <span
-              className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold transition-colors ${
-                isDoneOrCurrent ? 'bg-primary-100/90 text-primary-800' : 'bg-slate-100/80 text-slate-400'
-              }`}
-            >
-              {step.label}
-            </span>
-            {i < APPROVAL_STEPS.length - 1 && <span className="text-slate-300 text-xs">›</span>}
-          </div>
-        );
-      })}
-    </div>
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold ${meta.color}`}>
+      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+      {meta.label}
+    </span>
   );
 }
 
@@ -246,80 +237,72 @@ export function FinancePage() {
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ delay: idx * 0.04, duration: 0.2 }}
             >
-              <Card variant="glass" className="p-5 transition-shadow hover:shadow-md">
-                <div className="flex flex-wrap items-start justify-between gap-3">
+              <Card variant="glass" className="p-5 transition-shadow hover:shadow-xs border border-slate-200/80 bg-white">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="rounded-full bg-gold-100 px-2.5 py-0.5 text-xs font-bold text-gold-700">
-                        {EXPENSE_TYPE_LABELS[exp.expense_type] ?? exp.expense_type}
-                      </span>
                       <span className="text-base font-black tracking-tight text-primary-950">
-                        KES {Number(exp.amount).toLocaleString()}
+                        KES {Number(exp.amount).toLocaleString()} — {EXPENSE_TYPE_LABELS[exp.expense_type] ?? exp.expense_type}
                       </span>
                     </div>
-                    <p className="mt-2 text-sm leading-6 text-slate-700">{exp.description}</p>
-                    {exp.rejection_reason && (
-                      <p className="mt-1.5 text-xs font-bold text-red-600">Rejection Note: {exp.rejection_reason}</p>
-                    )}
+                    <p className="mt-1 text-xs text-slate-600">{exp.description}</p>
                     {exp.receipt_number && (
-                      <p className="mt-1.5 flex items-center gap-1 text-xs font-medium text-slate-500">
-                        <Receipt size={13} className="text-primary-700" /> Receipt: {exp.receipt_number}
-                      </p>
+                      <p className="mt-1 text-xs font-mono text-slate-500">Receipt Ref: {exp.receipt_number}</p>
+                    )}
+                    {exp.rejection_reason && (
+                      <p className="mt-1 text-xs font-bold text-red-600">Note: {exp.rejection_reason}</p>
                     )}
                   </div>
-                </div>
 
-                <div className="mt-4 border-t border-slate-100/70 pt-3">
-                  <ApprovalTrail status={exp.status} />
-                </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <ApprovalTrail status={exp.status} />
 
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {exp.status === 'requested' && hasPermission('finance.treasurer_review') && (
-                    <Button
-                      className="gap-1.5 px-3 py-1.5 text-xs font-bold"
-                      loading={treasurerMutation.isPending}
-                      onClick={() => treasurerMutation.mutate(exp.id)}
-                    >
-                      <CheckCircle2 size={14} /> Treasurer Review
-                    </Button>
-                  )}
-                  {exp.status === 'treasurer_reviewed' && hasPermission('finance.secretary_verify') && (
-                    <Button
-                      className="gap-1.5 px-3 py-1.5 text-xs font-bold"
-                      loading={secretaryMutation.isPending}
-                      onClick={() => secretaryMutation.mutate(exp.id)}
-                    >
-                      <CheckCircle2 size={14} /> Secretary Verify
-                    </Button>
-                  )}
-                  {exp.status === 'secretary_verified' && hasPermission('finance.approve') && (
-                    <Button
-                      className="gap-1.5 px-3 py-1.5 text-xs font-bold"
-                      loading={chairpersonMutation.isPending}
-                      onClick={() => chairpersonMutation.mutate(exp.id)}
-                    >
-                      <CheckCircle2 size={14} /> Chairperson Approve
-                    </Button>
-                  )}
-                  {exp.status === 'chairperson_approved' && hasPermission('finance.pay') && (
-                    <Button
-                      className="gap-1.5 px-3 py-1.5 text-xs font-bold"
-                      loading={paidMutation.isPending}
-                      onClick={() => paidMutation.mutate(exp.id)}
-                    >
-                      <CheckCircle2 size={14} /> Mark Paid
-                    </Button>
-                  )}
-                  {exp.status === 'paid' && hasPermission('finance.pay') && (
-                    <>
-                      {receiptDraftId === exp.id ? (
+                    {/* ONE contextual authorized action */}
+                    {exp.status === 'requested' && hasPermission('finance.treasurer_review') && (
+                      <Button
+                        className="px-3.5 py-1.5 text-xs font-bold bg-primary-900 text-white shadow-xs"
+                        loading={treasurerMutation.isPending}
+                        onClick={() => treasurerMutation.mutate(exp.id)}
+                      >
+                        Review Request
+                      </Button>
+                    )}
+                    {exp.status === 'treasurer_reviewed' && hasPermission('finance.secretary_verify') && (
+                      <Button
+                        className="px-3.5 py-1.5 text-xs font-bold bg-primary-900 text-white shadow-xs"
+                        loading={secretaryMutation.isPending}
+                        onClick={() => secretaryMutation.mutate(exp.id)}
+                      >
+                        Verify Request
+                      </Button>
+                    )}
+                    {exp.status === 'secretary_verified' && hasPermission('finance.approve') && (
+                      <Button
+                        className="px-3.5 py-1.5 text-xs font-bold bg-primary-900 text-white shadow-xs"
+                        loading={chairpersonMutation.isPending}
+                        onClick={() => chairpersonMutation.mutate(exp.id)}
+                      >
+                        Approve Request
+                      </Button>
+                    )}
+                    {exp.status === 'chairperson_approved' && hasPermission('finance.pay') && (
+                      <Button
+                        className="px-3.5 py-1.5 text-xs font-bold bg-primary-900 text-white shadow-xs"
+                        loading={paidMutation.isPending}
+                        onClick={() => paidMutation.mutate(exp.id)}
+                      >
+                        Disburse Payment
+                      </Button>
+                    )}
+                    {exp.status === 'paid' && hasPermission('finance.pay') && (
+                      receiptDraftId === exp.id ? (
                         <div className="flex items-center gap-2">
                           <input
                             autoFocus
-                            placeholder="Receipt number"
+                            placeholder="Receipt #"
                             value={receiptNumber}
                             onChange={(e) => setReceiptNumber(e.target.value)}
-                            className="rounded-2xl border border-white/70 bg-white/70 px-3 py-1.5 text-xs outline-none backdrop-blur-sm"
+                            className="rounded-xl border border-slate-200 px-3 py-1.5 text-xs outline-none text-slate-800"
                           />
                           <Button
                             className="px-3 py-1.5 text-xs font-bold"
@@ -332,54 +315,54 @@ export function FinancePage() {
                         </div>
                       ) : (
                         <Button
-                          className="gap-1.5 px-3 py-1.5 text-xs font-bold"
+                          variant="outline"
+                          className="px-3.5 py-1.5 text-xs font-bold"
                           onClick={() => setReceiptDraftId(exp.id)}
                         >
-                          <CheckCircle2 size={14} /> Record Receipt
+                          Record Receipt
                         </Button>
-                      )}
-                    </>
-                  )}
-                  {exp.status === 'receipted' && hasPermission('finance.audit') && (
-                    <Button
-                      className="gap-1.5 px-3 py-1.5 text-xs font-bold"
-                      loading={auditedMutation.isPending}
-                      onClick={() => auditedMutation.mutate(exp.id)}
-                    >
-                      <CheckCircle2 size={14} /> Mark Audited
-                    </Button>
-                  )}
-
-                  {!['paid', 'receipted', 'audited', 'rejected'].includes(exp.status) &&
-                    hasPermission('finance.approve') &&
-                    (rejectingId === exp.id ? (
-                      <div className="flex items-center gap-2">
-                        <input
-                          autoFocus
-                          placeholder="Rejection reason"
-                          value={reason}
-                          onChange={(e) => setReason(e.target.value)}
-                          className="rounded-2xl border border-white/70 bg-white/70 px-3 py-1.5 text-xs outline-none backdrop-blur-sm"
-                        />
-                        <Button
-                          variant="danger"
-                          className="px-3 py-1.5 text-xs font-bold"
-                          disabled={!reason.trim()}
-                          loading={rejectMutation.isPending}
-                          onClick={() => rejectMutation.mutate({ id: exp.id, reason })}
-                        >
-                          Confirm
-                        </Button>
-                      </div>
-                    ) : (
+                      )
+                    )}
+                    {exp.status === 'receipted' && hasPermission('finance.audit') && (
                       <Button
-                        variant="danger"
-                        className="gap-1.5 px-3 py-1.5 text-xs font-bold"
-                        onClick={() => setRejectingId(exp.id)}
+                        className="px-3.5 py-1.5 text-xs font-bold bg-emerald-800 text-white shadow-xs"
+                        loading={auditedMutation.isPending}
+                        onClick={() => auditedMutation.mutate(exp.id)}
                       >
-                        <XCircle size={14} /> Reject
+                        Complete Audit
                       </Button>
-                    ))}
+                    )}
+
+                    {!['paid', 'receipted', 'audited', 'rejected'].includes(exp.status) &&
+                      hasPermission('finance.approve') &&
+                      (rejectingId === exp.id ? (
+                        <div className="flex items-center gap-2">
+                          <input
+                            autoFocus
+                            placeholder="Rejection reason"
+                            value={reason}
+                            onChange={(e) => setReason(e.target.value)}
+                            className="rounded-xl border border-slate-200 px-2 py-1 text-xs outline-none"
+                          />
+                          <Button
+                            variant="danger"
+                            className="px-2.5 py-1 text-xs font-bold"
+                            disabled={!reason.trim()}
+                            loading={rejectMutation.isPending}
+                            onClick={() => rejectMutation.mutate({ id: exp.id, reason })}
+                          >
+                            Confirm
+                          </Button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setRejectingId(exp.id)}
+                          className="text-xs text-red-600 hover:text-red-800 hover:underline px-2 py-1"
+                        >
+                          Reject
+                        </button>
+                      ))}
+                  </div>
                 </div>
               </Card>
             </motion.div>

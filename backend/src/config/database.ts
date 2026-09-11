@@ -31,19 +31,327 @@ const memoryDb: MemoryDB = {
       { id: '12', code: 'publicity_chairperson', title: 'Publicity Committee Chairperson', display_order: 12, created_at: new Date().toISOString() },
       { id: '13', code: 'non_residents_chairperson', title: 'Non-Residents Committee Chairperson', display_order: 13, created_at: new Date().toISOString() },
     ],
+    leadership_positions: [
+      {
+        id: 'pos-1',
+        code: 'chairperson',
+        name: 'Chairperson',
+        category: 'executive',
+        description: 'Chief executive officer and spiritual visionary of TUMCU.',
+        constitutional_reference: 'Article 12.1',
+        is_executive: true,
+        requires_gender_rule: false,
+        active: true,
+        display_order: 1,
+        responsibilities: [
+          'Overall leadership, spiritual vision, and constitutional direction of TUMCU',
+          'Convenes and presides over Executive Committee and General Business Meetings',
+          'Official representative and signatory of the Christian Union with University & external bodies',
+          'Supervises all executive officers, committees, and constitutional ministries',
+          'Co-signatory for official TUMCU financial instruments and bank accounts'
+        ],
+        permissions: ['system.manage_roles', 'leadership.view', 'leadership.assign', 'meetings.view', 'meetings.create', 'events.view', 'events.approve', 'reports.view', 'finance.view', 'finance.approve', 'elections.manage'],
+        constitutional_restrictions: ['Cannot unilaterally authorize financial withdrawals without Executive Committee resolution', 'Must be a full member in good standing of at least 2 spiritual years']
+      },
+      {
+        id: 'pos-2',
+        code: 'first_vice_chairperson',
+        name: 'First Vice Chairperson',
+        category: 'executive',
+        description: 'Internal affairs and standing committee coordinator.',
+        constitutional_reference: 'Article 12.2',
+        is_executive: true,
+        requires_gender_rule: false,
+        active: true,
+        display_order: 2,
+        responsibilities: [
+          'Deputizes the Chairperson and acts in their absence',
+          'Coordinates internal affairs and standing committees (Welfare, Hospitality, Prayer)',
+          'Monitors constitutional compliance across all union sub-organs',
+          'Oversees spiritual welfare and pastoral care among members'
+        ],
+        permissions: ['leadership.view', 'committees.view', 'welfare.view', 'welfare.approve', 'reports.view', 'meetings.view', 'events.view', 'attendance.view'],
+        constitutional_restrictions: ['Acts as Chairperson only upon formal delegation or vacancy under Article 9']
+      },
+      {
+        id: 'pos-3',
+        code: 'second_vice_chairperson',
+        name: 'Second Vice Chairperson',
+        category: 'executive',
+        description: 'External outreach, missions, and ministries coordinator.',
+        constitutional_reference: 'Article 12.3',
+        is_executive: true,
+        requires_gender_rule: false,
+        active: true,
+        display_order: 3,
+        responsibilities: [
+          'Coordinates external ministries (High School, Hospital, Missions, Creative)',
+          'Liaises with associate members, alumni body, and partner campus Christian Unions',
+          'Assists in planning joint fellowship events and inter-varsity conferences',
+          'Directs evangelistic field operations'
+        ],
+        permissions: ['leadership.view', 'ministries.view', 'ministries.manage_members', 'events.view', 'events.create', 'reports.view'],
+        constitutional_restrictions: ['Subject to Executive Committee policy regarding external partnerships']
+      },
+      {
+        id: 'pos-4',
+        code: 'secretary',
+        name: 'Secretary',
+        category: 'executive',
+        description: 'Custodian of records, correspondence, minutes, and membership registers.',
+        constitutional_reference: 'Article 12.4',
+        is_executive: true,
+        requires_gender_rule: false,
+        active: true,
+        display_order: 4,
+        responsibilities: [
+          'Maintains accurate registers of certified full members, special members, and associates',
+          'Records and preserves comprehensive minutes of all Executive and General meetings',
+          'Handles all official correspondence and notices of the Christian Union',
+          'Issues certificates of membership and official recommendation letters',
+          'Co-signatory for official TUMCU correspondence and constitutional petitions'
+        ],
+        permissions: ['membership.view_all', 'membership.review', 'membership.approve', 'meetings.view', 'meetings.create', 'meetings.manage_minutes', 'communication.view', 'communication.create', 'reports.view', 'leadership.view'],
+        constitutional_restrictions: ['Minutes must be formally confirmed and signed at the next ordinary meeting', 'Cannot alter membership register without approved application or constitutional resolution']
+      },
+      {
+        id: 'pos-5',
+        code: 'vice_secretary',
+        name: 'Vice Secretary',
+        category: 'executive',
+        description: 'Hospitality coordinator, guest ministers liaison, and secretarial assistant.',
+        constitutional_reference: 'Article 12.5',
+        is_executive: true,
+        requires_gender_rule: false,
+        active: true,
+        display_order: 5,
+        responsibilities: [
+          'Assists the Secretary and records minutes in their absence',
+          'Oversees hospitality for guest ministers, external speakers, and visiting teams',
+          'Coordinates Catering and Ushering logistics for Sunday services and conferences',
+          'Supervises meeting venues arrangement and welcome protocols'
+        ],
+        permissions: ['meetings.view', 'events.view', 'communication.view', 'reports.view', 'ministries.view'],
+        constitutional_restrictions: ['Works under supervision of Secretary and Executive Committee']
+      },
+      {
+        id: 'pos-6',
+        code: 'treasurer',
+        name: 'Treasurer',
+        category: 'executive',
+        description: 'Custodian of funds, financial stewardship, receipts, budgets, and accounting.',
+        constitutional_reference: 'Article 12.6',
+        is_executive: true,
+        requires_gender_rule: false,
+        active: true,
+        display_order: 6,
+        responsibilities: [
+          'Maintains complete, transparent books of accounts and records all receipts and payments',
+          'Issues official TUMCU receipts for all tithes, offerings, donations, and pledges',
+          'Prepares annual and semester operational budgets for Executive and AGM approval',
+          'Chairs Treasury Committee and prepares financial statements for internal and external audits',
+          'Supervises capital project accounts and bank reconciliations'
+        ],
+        permissions: ['finance.view', 'finance.create', 'finance.receipts', 'finance.budget', 'finance.reports', 'project.manage', 'reports.view'],
+        constitutional_restrictions: [
+          'Cannot independently authorize restricted withdrawals (Article 15.3)',
+          'Withdrawals require Executive/Subcommittee resolution and two authorized signatories',
+          'Must present books for audit at least two weeks before Annual General Meeting'
+        ]
+      },
+      {
+        id: 'pos-7',
+        code: 'prayer_chairperson',
+        name: 'Prayer Committee Chairperson',
+        category: 'executive',
+        description: 'Spiritual intercession, prayer chains, keshas, and morning devotions.',
+        constitutional_reference: 'Article 12.7',
+        is_executive: true,
+        requires_gender_rule: false,
+        active: true,
+        display_order: 7,
+        responsibilities: [
+          'Chairs Prayer Committee and guides the spiritual intercessory pulse of TUMCU',
+          'Organizes weekly overnight prayer vigils (keshas), fasts, and semester prayer weeks',
+          'Coordinates confidential prayer request handling and intercession chains',
+          'Mobilizes campus morning devotions and hostel prayer altars'
+        ],
+        permissions: ['prayer.view', 'prayer.view_confidential', 'prayer.create', 'prayer.edit', 'events.view', 'meetings.view'],
+        constitutional_restrictions: ['Confidential prayer requests must not be publicly disclosed without permission']
+      },
+      {
+        id: 'pos-8',
+        code: 'worship_chairperson',
+        name: 'Worship Committee Chairperson',
+        category: 'executive',
+        description: 'Liturgical worship, Praise & Worship team, instrumentalists, and music repertoire.',
+        constitutional_reference: 'Article 12.8',
+        is_executive: true,
+        requires_gender_rule: false,
+        active: true,
+        display_order: 8,
+        responsibilities: [
+          'Chairs Worship Committee and coordinates liturgical musical excellence',
+          'Oversees Praise & Worship Ministry and Instrumentalists Ministry',
+          'Schedules song leaders, rehearsals, workshops, and worship nights',
+          'Maintains sound balance and spiritual reverence in music selection'
+        ],
+        permissions: ['ministries.view', 'events.view', 'events.create', 'attendance.view'],
+        constitutional_restrictions: ['All song repertoires must align with TUMCU doctrinal basis (Article 4)']
+      },
+      {
+        id: 'pos-9',
+        code: 'missions_chairperson',
+        name: 'Mission Committee Chairperson',
+        category: 'executive',
+        description: 'Evangelism field mobilization, annual missions, and community outreaches.',
+        constitutional_reference: 'Article 12.9',
+        is_executive: true,
+        requires_gender_rule: false,
+        active: true,
+        display_order: 9,
+        responsibilities: [
+          'Chairs Missions Committee and plans annual mega mission trips and weekend missions',
+          'Coordinates evangelism teams, open-air crusades, door-to-door gospel witnessing',
+          'Liaises with mission fields, partner churches, and rural ministry stations',
+          'Conducts cross-cultural mission training and post-mission follow-ups'
+        ],
+        permissions: ['events.view', 'events.create', 'ministries.view', 'reports.view'],
+        constitutional_restrictions: ['Mission budgets require Executive Committee resolution and Treasurer review']
+      },
+      {
+        id: 'pos-10',
+        code: 'discipleship_chairperson',
+        name: 'Discipleship Committee Chairperson',
+        category: 'executive',
+        description: 'Nurturing classes, Bible Study (BEST) groups, new converts, and spiritual mentorship.',
+        constitutional_reference: 'Article 12.10',
+        is_executive: true,
+        requires_gender_rule: false,
+        active: true,
+        display_order: 10,
+        responsibilities: [
+          'Chairs Discipleship Committee and designs foundational follow-up for new converts',
+          'Coordinates Bible Study (BEST) small groups, facilitators, and study guides',
+          'Organizes mentorship cohorts and first-year student spiritual orientation',
+          'Maintains discipleship spiritual records and baptism preparation classes'
+        ],
+        permissions: ['membership.view_all', 'events.view', 'meetings.view', 'reports.view'],
+        constitutional_restrictions: ['Doctrinal materials must strictly conform to TUMCU Statement of Faith']
+      },
+      {
+        id: 'pos-11',
+        code: 'assets_chairperson',
+        name: 'Assets Committee Chairperson',
+        category: 'executive',
+        description: 'Stewardship, maintenance, inventory, equipment loans, and hardware procurement.',
+        constitutional_reference: 'Article 12.11',
+        is_executive: true,
+        requires_gender_rule: false,
+        active: true,
+        display_order: 11,
+        responsibilities: [
+          'Chairs Assets Committee and oversees all union hardware, sound gear, instruments, and furniture',
+          'Maintains updated asset register, tagging, serial numbers, and condition reports',
+          'Controls equipment borrowing, loan agreements, and return inspections',
+          'Coordinates routine maintenance, servicing, repair, and safe storage'
+        ],
+        permissions: ['assets.view', 'assets.manage', 'reports.view', 'events.view'],
+        constitutional_restrictions: ['Disposal or acquisition of capital assets requires Executive Committee sanction']
+      },
+      {
+        id: 'pos-12',
+        code: 'publicity_chairperson',
+        name: 'Publicity Committee Chairperson',
+        category: 'executive',
+        description: 'Announcements, website, social media, posters, photography, and livestreams.',
+        constitutional_reference: 'Article 12.12',
+        is_executive: true,
+        requires_gender_rule: false,
+        active: true,
+        display_order: 12,
+        responsibilities: [
+          'Chairs Publicity Committee and coordinates campus branding and communication',
+          'Oversees Media Ministry, livestream broadcasts, and digital content',
+          'Designs official event posters, digital flyers, bulletin publications, and website updates',
+          'Publishes authorized announcements across university platforms and halls of residence'
+        ],
+        permissions: ['communication.view', 'communication.create', 'communication.edit', 'events.view', 'ministries.view'],
+        constitutional_restrictions: ['Public publications must reflect Christian decorum and Executive endorsement']
+      },
+      {
+        id: 'pos-13',
+        code: 'non_residents_chairperson',
+        name: 'Non-Residents Committee Chairperson',
+        category: 'executive',
+        description: 'Off-campus student fellowship, non-resident welfare, and neighborhood cell groups.',
+        constitutional_reference: 'Article 12.13',
+        is_executive: true,
+        requires_gender_rule: false,
+        active: true,
+        display_order: 13,
+        responsibilities: [
+          'Chairs Non-Residents Committee and champions welfare of off-campus students',
+          'Organizes neighborhood Bible study cells, hostel fellowships, and outreach',
+          'Coordinates night travel logistics and transport security during keshas and late services',
+          'Advocates for non-resident representation and integration in all CU programs'
+        ],
+        permissions: ['welfare.view', 'events.view', 'meetings.view', 'reports.view'],
+        constitutional_restrictions: ['Must maintain active liaison with University Dean of Students for off-campus welfare']
+      },
+      {
+        id: 'pos-14',
+        code: 'welfare_chairperson',
+        name: 'Welfare Committee Chairperson',
+        category: 'committee',
+        description: 'Benevolent support, student emergency funds, bereavement care, and hospital visits.',
+        constitutional_reference: 'Article 13.1',
+        is_executive: false,
+        requires_gender_rule: false,
+        active: true,
+        display_order: 14,
+        responsibilities: [
+          'Chairs Welfare Committee and processes confidential student benevolent requests',
+          'Coordinates meal assistance, emergency hospital welfare, and funeral condolences',
+          'Maintains transparent records of welfare allocations under 1st Vice Chairperson supervision'
+        ],
+        permissions: ['welfare.view', 'welfare.approve', 'reports.view'],
+        constitutional_restrictions: ['Welfare disbursements are strictly governed by approved benevolence ceilings']
+      },
+      {
+        id: 'pos-15',
+        code: 'media_ministry_leader',
+        name: 'Media Ministry Leader',
+        category: 'ministry',
+        description: 'Audio-visual production, livestream operations, equipment management, and team schedule.',
+        constitutional_reference: 'Article 16.1',
+        is_executive: false,
+        requires_gender_rule: false,
+        active: true,
+        display_order: 15,
+        responsibilities: [
+          'Leads Media Ministry operations: Sunday livestreams, video recording, photography',
+          'Schedules camera operators, sound technicians, and projectionists for all services',
+          'Maintains media equipment inventory, digital library assets, and archives',
+          'Conducts technical skills training workshops for ministry apprentices'
+        ],
+        permissions: ['ministries.view', 'ministries.manage_members', 'communication.create', 'assets.view'],
+        constitutional_restrictions: ['Works under guidance of Publicity Committee Chairperson']
+      }
+    ],
     ministries: [
-      { id: 'min-1', code: 'intercessory', name: 'Intercessory Ministry', description: 'Dedicated to prayer, fasting, and spiritual intercession for the CU and campus.', meeting_day: 'Wednesdays & Fridays', meeting_venue: 'Main Chapel', created_at: new Date().toISOString() },
-      { id: 'min-2', code: 'worship', name: 'Praise & Worship Ministry', description: 'Leading the congregation into the manifest presence of God through spirit-filled worship.', meeting_day: 'Tuesdays & Thursdays', meeting_venue: 'Assembly Hall', created_at: new Date().toISOString() },
-      { id: 'min-3', code: 'instrumentalists', name: 'Instrumentalists Ministry', description: 'Skillfully ministering with musical instruments to support worship services.', meeting_day: 'Tuesdays & Saturdays', meeting_venue: 'Music Room', created_at: new Date().toISOString() },
-      { id: 'min-4', code: 'ushering', name: 'Ushering Ministry', description: 'Welcoming believers, maintaining order, and fostering hospitality in all gatherings.', meeting_day: 'Thursdays', meeting_venue: 'Chapel Foyer', created_at: new Date().toISOString() },
-      { id: 'min-5', code: 'catering', name: 'Catering Ministry', description: 'Managing hospitality, food, and refreshments during CU events, AGMs, and conferences.', meeting_day: 'Saturdays before events', meeting_venue: 'Dining Hall Kitchen', created_at: new Date().toISOString() },
-      { id: 'min-6', code: 'media', name: 'Media Ministry', description: 'Audio-visual production, livestreaming, photography, and digital ministry outreach.', meeting_day: 'Fridays', meeting_venue: 'Media Studio', created_at: new Date().toISOString() },
-      { id: 'min-7', code: 'creative', name: 'Creative Ministry', description: 'Proclaiming the Gospel through Christian drama, poetry, spoken word, and dance.', meeting_day: 'Mondays & Wednesdays', meeting_venue: 'Amphitheatre', created_at: new Date().toISOString() },
-      { id: 'min-8', code: 'technicians', name: 'Technicians Ministry', description: 'Sound engineering, electrical setup, lighting, and stage technical management.', meeting_day: 'Saturdays', meeting_venue: 'Control Booth', created_at: new Date().toISOString() },
-      { id: 'min-9', code: 'high_school', name: 'High School Ministry', description: 'Evangelism, mentorship, and discipleship missions to secondary schools in Mombasa.', meeting_day: 'Sundays', meeting_venue: 'Room B10', created_at: new Date().toISOString() },
-      { id: 'min-10', code: 'hospital', name: 'Hospital Ministry', description: 'Visiting patients in Coast General and local clinics with prayers and care packages.', meeting_day: 'Saturdays', meeting_venue: 'Hospital Gate', created_at: new Date().toISOString() },
-      { id: 'min-11', code: 'brothers', name: "Brothers' Ministry", description: 'Building godly men through fellowship, accountability, and leadership development.', meeting_day: 'Alternate Fridays', meeting_venue: 'Hostel Courtyard', created_at: new Date().toISOString() },
-      { id: 'min-12', code: 'sisters', name: "Sisters' Ministry", description: 'Nurturing virtuous women of faith, character, and spiritual excellence.', meeting_day: 'Alternate Fridays', meeting_venue: 'Chapel Hall', created_at: new Date().toISOString() },
+      { id: 'min-1', code: 'intercessory', name: 'Intercessory Ministry', description: 'Dedicated to prayer, fasting, and spiritual intercession for the CU and campus.', meeting_day: 'Wednesdays & Fridays', meeting_venue: 'Main Chapel', image_url: 'https://images.unsplash.com/photo-1507692049790-de58290a4334?auto=format&fit=crop&w=1200&q=80', created_at: new Date().toISOString() },
+      { id: 'min-2', code: 'worship', name: 'Praise & Worship Ministry', description: 'Leading the congregation into the manifest presence of God through spirit-filled worship.', meeting_day: 'Tuesdays & Thursdays', meeting_venue: 'Assembly Hall', image_url: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=1200&q=80', created_at: new Date().toISOString() },
+      { id: 'min-3', code: 'instrumentalists', name: 'Instrumentalists Ministry', description: 'Skillfully ministering with musical instruments to support worship services.', meeting_day: 'Tuesdays & Saturdays', meeting_venue: 'Music Room', image_url: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1200&q=80', created_at: new Date().toISOString() },
+      { id: 'min-4', code: 'ushering', name: 'Ushering Ministry', description: 'Welcoming believers, maintaining order, and fostering hospitality in all gatherings.', meeting_day: 'Thursdays', meeting_venue: 'Chapel Foyer', image_url: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=1200&q=80', created_at: new Date().toISOString() },
+      { id: 'min-5', code: 'catering', name: 'Catering Ministry', description: 'Managing hospitality, food, and refreshments during CU events, AGMs, and conferences.', meeting_day: 'Saturdays before events', meeting_venue: 'Dining Hall Kitchen', image_url: 'https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=1200&q=80', created_at: new Date().toISOString() },
+      { id: 'min-6', code: 'media', name: 'Media Ministry', description: 'Audio-visual production, livestreaming, photography, and digital ministry outreach.', meeting_day: 'Fridays', meeting_venue: 'Media Studio', image_url: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=1200&q=80', created_at: new Date().toISOString() },
+      { id: 'min-7', code: 'creative', name: 'Creative Ministry', description: 'Proclaiming the Gospel through Christian drama, poetry, spoken word, and dance.', meeting_day: 'Mondays & Wednesdays', meeting_venue: 'Amphitheatre', image_url: 'https://images.unsplash.com/photo-1460723237483-7a6dc9d0b212?auto=format&fit=crop&w=1200&q=80', created_at: new Date().toISOString() },
+      { id: 'min-8', code: 'technicians', name: 'Technicians Ministry', description: 'Sound engineering, electrical setup, lighting, and stage technical management.', meeting_day: 'Saturdays', meeting_venue: 'Control Booth', image_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80', created_at: new Date().toISOString() },
+      { id: 'min-9', code: 'high_school', name: 'High School Ministry', description: 'Evangelism, mentorship, and discipleship missions to secondary schools in Mombasa.', meeting_day: 'Sundays', meeting_venue: 'Room B10', image_url: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=80', created_at: new Date().toISOString() },
+      { id: 'min-10', code: 'hospital', name: 'Hospital Ministry', description: 'Visiting patients in Coast General and local clinics with prayers and care packages.', meeting_day: 'Saturdays', meeting_venue: 'Hospital Gate', image_url: 'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&w=1200&q=80', created_at: new Date().toISOString() },
+      { id: 'min-11', code: 'brothers', name: "Brothers' Ministry", description: 'Building godly men through fellowship, accountability, and leadership development.', meeting_day: 'Alternate Fridays', meeting_venue: 'Hostel Courtyard', image_url: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80', created_at: new Date().toISOString() },
+      { id: 'min-12', code: 'sisters', name: "Sisters' Ministry", description: 'Nurturing virtuous women of faith, character, and spiritual excellence.', meeting_day: 'Alternate Fridays', meeting_venue: 'Chapel Hall', image_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1200&q=80', created_at: new Date().toISOString() },
     ],
     committees: [
       { id: 'com-1', code: 'prayer', name: 'Prayer Committee', description: 'Oversees campus prayer networks, weekly night vigils, and prayer weeks.', created_at: new Date().toISOString() },
@@ -111,6 +419,21 @@ const memoryDb: MemoryDB = {
     ],
     role_permissions: [],
     users: [
+      {
+        id: 'usr-meshack-1',
+        username: 'meshack',
+        email: 'meshackokoth436@gmail.com',
+        phone_number: '+254700000436',
+        password_hash: bcrypt.hashSync('Admin@12345', 10),
+        full_name: 'Meshack Okoth (Super Administrator)',
+        gender: 'male',
+        admission_number: 'ADM/2026/000',
+        school: 'School of Computing and Informatics',
+        course: 'BSc. Computer Science',
+        year_of_study: 4,
+        account_status: 'active',
+        created_at: new Date(Date.now() - 60 * 86400000).toISOString(),
+      },
       {
         id: 'usr-admin-1',
         username: 'admin',
@@ -216,15 +539,512 @@ const memoryDb: MemoryDB = {
         account_status: 'pending_approval',
         created_at: new Date(Date.now() - 4 * 3600000).toISOString(),
       },
+      {
+        id: 'usr-app-4',
+        username: 'faith_cherono',
+        email: 'faith.cherono@students.tum.ac.ke',
+        phone_number: '+254711223344',
+        password_hash: bcrypt.hashSync('Password123!', 10),
+        full_name: 'Faith Cherono',
+        gender: 'female',
+        admission_number: 'BCOM/2026/045',
+        school: 'School of Business and Social Sciences',
+        course: 'Bachelor of Commerce',
+        year_of_study: 1,
+        account_status: 'pending_approval',
+        created_at: new Date(Date.now() - 12 * 3600000).toISOString(),
+      },
+      {
+        id: 'usr-app-5',
+        username: 'brian_kipchumba',
+        email: 'brian.kipchumba@students.tum.ac.ke',
+        phone_number: '+254722334466',
+        password_hash: bcrypt.hashSync('Password123!', 10),
+        full_name: 'Brian Kipchumba',
+        gender: 'male',
+        admission_number: 'BCS/2026/112',
+        school: 'School of Computing and Informatics',
+        course: 'BSc. Computer Science',
+        year_of_study: 1,
+        account_status: 'pending_approval',
+        created_at: new Date(Date.now() - 18 * 3600000).toISOString(),
+      },
+      {
+        id: 'usr-app-6',
+        username: 'mercy_atieno',
+        email: 'mercy.atieno@students.tum.ac.ke',
+        phone_number: '+254733556677',
+        password_hash: bcrypt.hashSync('Password123!', 10),
+        full_name: 'Mercy Atieno',
+        gender: 'female',
+        admission_number: 'BED/2026/094',
+        school: 'School of Humanities and Social Sciences',
+        course: 'Bachelor of Education (Arts)',
+        year_of_study: 2,
+        account_status: 'pending_approval',
+        created_at: new Date(Date.now() - 24 * 3600000).toISOString(),
+      },
+      {
+        id: 'usr-app-7',
+        username: 'samuel_wambua',
+        email: 'samuel.wambua@students.tum.ac.ke',
+        phone_number: '+254744667788',
+        password_hash: bcrypt.hashSync('Password123!', 10),
+        full_name: 'Samuel Wambua',
+        gender: 'male',
+        admission_number: 'BME/2026/033',
+        school: 'School of Engineering and Technology',
+        course: 'BSc. Mechanical Engineering',
+        year_of_study: 1,
+        account_status: 'pending_approval',
+        created_at: new Date(Date.now() - 30 * 3600000).toISOString(),
+      },
+      {
+        id: 'usr-app-8',
+        username: 'esther_muthoni',
+        email: 'esther.muthoni@students.tum.ac.ke',
+        phone_number: '+254755778899',
+        password_hash: bcrypt.hashSync('Password123!', 10),
+        full_name: 'Esther Muthoni',
+        gender: 'female',
+        admission_number: 'MLS/2026/019',
+        school: 'School of Applied and Health Sciences',
+        course: 'BSc. Medical Laboratory Science',
+        year_of_study: 2,
+        account_status: 'pending_approval',
+        created_at: new Date(Date.now() - 36 * 3600000).toISOString(),
+      },
+      {
+        id: 'usr-app-9',
+        username: 'joshua_karanja',
+        email: 'joshua.karanja@students.tum.ac.ke',
+        phone_number: '+254766889900',
+        password_hash: bcrypt.hashSync('Password123!', 10),
+        full_name: 'Joshua Karanja',
+        gender: 'male',
+        admission_number: 'BCE/2026/082',
+        school: 'School of Engineering and Technology',
+        course: 'BSc. Civil Engineering',
+        year_of_study: 1,
+        account_status: 'pending_approval',
+        created_at: new Date(Date.now() - 42 * 3600000).toISOString(),
+      },
+      {
+        id: 'usr-app-10',
+        username: 'lydia_chebet',
+        email: 'lydia.chebet@students.tum.ac.ke',
+        phone_number: '+254777990011',
+        password_hash: bcrypt.hashSync('Password123!', 10),
+        full_name: 'Lydia Chebet',
+        gender: 'female',
+        admission_number: 'BBA/2026/056',
+        school: 'School of Business and Social Sciences',
+        course: 'Bachelor of Business Administration',
+        year_of_study: 1,
+        account_status: 'pending_approval',
+        created_at: new Date(Date.now() - 48 * 3600000).toISOString(),
+      },
+      {
+        id: 'usr-app-11',
+        username: 'stephen_ndwiga',
+        email: 'stephen.ndwiga@students.tum.ac.ke',
+        phone_number: '+254788001122',
+        password_hash: bcrypt.hashSync('Password123!', 10),
+        full_name: 'Stephen Ndwiga',
+        gender: 'male',
+        admission_number: 'BENG/2026/220',
+        school: 'School of Engineering and Technology',
+        course: 'BSc. Telecommunications Engineering',
+        year_of_study: 2,
+        account_status: 'pending_approval',
+        created_at: new Date(Date.now() - 54 * 3600000).toISOString(),
+      },
+      {
+        id: 'usr-app-12',
+        username: 'grace_wanjala',
+        email: 'grace.wanjala@students.tum.ac.ke',
+        phone_number: '+254799112233',
+        password_hash: bcrypt.hashSync('Password123!', 10),
+        full_name: 'Grace Wanjala',
+        gender: 'female',
+        admission_number: 'BCS/2026/077',
+        school: 'School of Computing and Informatics',
+        course: 'BSc. Information Technology',
+        year_of_study: 1,
+        account_status: 'pending_approval',
+        created_at: new Date(Date.now() - 60 * 3600000).toISOString(),
+      },
+    ],
+    leadership_assignments: [
+      {
+        id: 'assign-1',
+        position_id: 'pos-1',
+        user_id: 'usr-chair-1',
+        academic_year: '2025/2026',
+        assignment_type: 'permanent',
+        start_date: '2025-09-01',
+        end_date: '2026-08-31',
+        status: 'active',
+        vacancy_reason: null,
+        vacancy_date: null,
+        notes: 'Duly elected at the 2025 Annual General Meeting pursuant to Article 14.',
+        created_at: '2025-09-01T08:00:00.000Z'
+      },
+      {
+        id: 'assign-2',
+        position_id: 'pos-2',
+        user_id: 'usr-app-1',
+        academic_year: '2025/2026',
+        assignment_type: 'permanent',
+        start_date: '2025-09-01',
+        end_date: '2026-08-31',
+        status: 'active',
+        vacancy_reason: null,
+        vacancy_date: null,
+        notes: 'Elected pursuant to constitutional provisions (Article 12.2).',
+        created_at: '2025-09-01T08:00:00.000Z'
+      },
+      {
+        id: 'assign-3',
+        position_id: 'pos-3',
+        user_id: 'usr-app-2',
+        academic_year: '2025/2026',
+        assignment_type: 'permanent',
+        start_date: '2025-09-01',
+        end_date: '2026-08-31',
+        status: 'active',
+        vacancy_reason: null,
+        vacancy_date: null,
+        notes: 'Elected at AGM.',
+        created_at: '2025-09-01T08:00:00.000Z'
+      },
+      {
+        id: 'assign-4',
+        position_id: 'pos-4',
+        user_id: 'usr-app-3',
+        academic_year: '2025/2026',
+        assignment_type: 'permanent',
+        start_date: '2025-09-01',
+        end_date: '2026-08-31',
+        status: 'active',
+        vacancy_reason: null,
+        vacancy_date: null,
+        notes: 'Elected Secretary.',
+        created_at: '2025-09-01T08:00:00.000Z'
+      },
+      {
+        id: 'assign-5',
+        position_id: 'pos-5',
+        user_id: 'usr-member-1',
+        academic_year: '2025/2026',
+        assignment_type: 'permanent',
+        start_date: '2025-09-01',
+        end_date: '2026-08-31',
+        status: 'active',
+        vacancy_reason: null,
+        vacancy_date: null,
+        notes: 'Elected Vice Secretary.',
+        created_at: '2025-09-01T08:00:00.000Z'
+      },
+      {
+        id: 'assign-6',
+        position_id: 'pos-6',
+        user_id: 'usr-meshack-1',
+        academic_year: '2025/2026',
+        assignment_type: 'permanent',
+        start_date: '2025-09-01',
+        end_date: '2026-08-31',
+        status: 'active',
+        vacancy_reason: null,
+        vacancy_date: null,
+        notes: 'Elected Treasurer. Custodian of funds and financial records.',
+        created_at: '2025-09-01T08:00:00.000Z'
+      },
+      {
+        id: 'assign-7',
+        position_id: 'pos-7',
+        user_id: null,
+        academic_year: '2025/2026',
+        assignment_type: 'permanent',
+        start_date: '2025-09-01',
+        end_date: '2026-09-02',
+        status: 'vacant',
+        vacancy_reason: 'Resignation with two weeks written notice (Article 9.4)',
+        vacancy_date: '2026-09-02',
+        notes: 'Position vacant following formal resignation tabled to Executive Committee.',
+        created_at: '2025-09-01T08:00:00.000Z'
+      },
+      {
+        id: 'assign-8',
+        position_id: 'pos-8',
+        user_id: 'usr-leader-1',
+        academic_year: '2025/2026',
+        assignment_type: 'permanent',
+        start_date: '2025-09-01',
+        end_date: '2026-08-31',
+        status: 'active',
+        vacancy_reason: null,
+        vacancy_date: null,
+        notes: 'Worship Committee Chairperson.',
+        created_at: '2025-09-01T08:00:00.000Z'
+      },
+      {
+        id: 'assign-9',
+        position_id: 'pos-9',
+        user_id: 'usr-admin-1',
+        academic_year: '2025/2026',
+        assignment_type: 'acting',
+        start_date: '2026-01-10',
+        end_date: '2026-08-31',
+        status: 'active',
+        vacancy_reason: null,
+        vacancy_date: null,
+        notes: 'Acting Missions Chairperson appointed pursuant to Article 9.1.',
+        created_at: '2026-01-10T08:00:00.000Z'
+      },
+      {
+        id: 'assign-10',
+        position_id: 'pos-10',
+        user_id: 'usr-chair-1',
+        academic_year: '2025/2026',
+        assignment_type: 'co-opted',
+        start_date: '2025-10-01',
+        end_date: '2026-08-31',
+        status: 'active',
+        vacancy_reason: null,
+        vacancy_date: null,
+        notes: 'Co-opted Discipleship Chairperson.',
+        created_at: '2025-10-01T08:00:00.000Z'
+      },
+      {
+        id: 'assign-11',
+        position_id: 'pos-11',
+        user_id: 'usr-app-1',
+        academic_year: '2025/2026',
+        assignment_type: 'permanent',
+        start_date: '2025-09-01',
+        end_date: '2026-08-31',
+        status: 'active',
+        vacancy_reason: null,
+        vacancy_date: null,
+        notes: 'Assets Committee Chairperson.',
+        created_at: '2025-09-01T08:00:00.000Z'
+      },
+      {
+        id: 'assign-12',
+        position_id: 'pos-12',
+        user_id: 'usr-app-2',
+        academic_year: '2025/2026',
+        assignment_type: 'permanent',
+        start_date: '2025-09-01',
+        end_date: '2026-08-31',
+        status: 'active',
+        vacancy_reason: null,
+        vacancy_date: null,
+        notes: 'Publicity Committee Chairperson.',
+        created_at: '2025-09-01T08:00:00.000Z'
+      },
+      {
+        id: 'assign-13',
+        position_id: 'pos-13',
+        user_id: null,
+        academic_year: '2025/2026',
+        assignment_type: 'permanent',
+        start_date: '2025-09-01',
+        end_date: '2026-08-25',
+        status: 'vacant',
+        vacancy_reason: 'Unfilled Vacancy after Semester Rotations (Article 9.2)',
+        vacancy_date: '2026-08-25',
+        notes: 'Awaiting appointment of an off-campus full member.',
+        created_at: '2025-09-01T08:00:00.000Z'
+      }
+    ],
+    custom_committees: [
+      {
+        id: 'cc-1',
+        name: '2026 TUMCU 40th Anniversary Committee',
+        purpose: 'Plan Ruby Jubilee celebration, alumni homecoming banquet, and historical documentation.',
+        start_date: '2026-02-01',
+        end_date: '2026-11-30',
+        chairperson_name: 'David Mutua',
+        secretary_name: 'Sarah Mwangi',
+        member_count: 8,
+        status: 'active',
+        created_at: '2026-02-01T10:00:00.000Z'
+      },
+      {
+        id: 'cc-2',
+        name: 'Missions Field Mobilization Committee 2026',
+        purpose: 'Coordinate logistics, transport, tentage, and catering for the upcoming annual coastal outreach.',
+        start_date: '2026-03-01',
+        end_date: '2026-08-31',
+        chairperson_name: 'Caleb Kiprop',
+        secretary_name: 'Emmanuel Mwangi',
+        member_count: 6,
+        status: 'active',
+        created_at: '2026-03-01T10:00:00.000Z'
+      }
+    ],
+    finance_resolutions: [
+      {
+        id: 'fres-1',
+        resolution_number: 'EX-RES-2026/09-01',
+        title: 'Mission Outreach Evangelism Logistics - Coast Region',
+        amount: 45000,
+        category: 'Missions & Evangelism',
+        status: 'pending_signatures',
+        prepared_by: 'Meshack Okoth (Treasurer)',
+        signatory_1: 'David Mutua (Chairperson) - Signed',
+        signatory_2: 'Pending (Secretary)',
+        description: 'Provision of hire transport and field sound public address system for Kilifi missions.',
+        created_at: '2026-09-08T14:30:00.000Z'
+      },
+      {
+        id: 'fres-2',
+        resolution_number: 'EX-RES-2026/09-02',
+        title: 'Sanctuary Sound Console Mixer Repair & Cable Replacement',
+        amount: 18500,
+        category: 'Assets & Equipment',
+        status: 'pending_signatures',
+        prepared_by: 'Meshack Okoth (Treasurer)',
+        signatory_1: 'Pending (Chairperson)',
+        signatory_2: 'Pending (Secretary)',
+        description: 'Urgent service of Behringer X32 channel boards and XLR snake cables before Sunday fellowship.',
+        created_at: '2026-09-09T09:15:00.000Z'
+      },
+      {
+        id: 'fres-3',
+        resolution_number: 'EX-RES-2026/09-03',
+        title: 'First-Year Nurturing Class Study Materials & New Convert Guides',
+        amount: 12000,
+        category: 'Discipleship',
+        status: 'pending_signatures',
+        prepared_by: 'Meshack Okoth (Treasurer)',
+        signatory_1: 'David Mutua (Chairperson) - Signed',
+        signatory_2: 'Pending (Vice Secretary)',
+        description: 'Procurement of 150 copies of First Steps in Christ booklets for September orientation.',
+        created_at: '2026-09-10T11:00:00.000Z'
+      }
     ],
     user_roles: [
+      { id: 'ur-meshack-1', user_id: 'usr-meshack-1', role_id: 'role-1', scope_type: null, scope_id: null },
       { id: 'ur-1', user_id: 'usr-admin-1', role_id: 'role-1', scope_type: null, scope_id: null },
       { id: 'ur-2', user_id: 'usr-chair-1', role_id: 'role-3', scope_type: null, scope_id: null },
       { id: 'ur-3', user_id: 'usr-leader-1', role_id: 'role-9', scope_type: 'ministry', scope_id: 'min-2' },
       { id: 'ur-4', user_id: 'usr-member-1', role_id: 'role-10', scope_type: null, scope_id: null },
     ],
-    events: [],
-    meetings: [],
+    events: [
+      {
+        id: 'evt-1',
+        title: 'Weekly Bible Study (BEST) - "Living Faith in Campus"',
+        day_of_week: 'Monday',
+        date: '2026-09-14',
+        start_time: '17:30',
+        end_time: '19:30',
+        venue: 'Lecture Theatres LH1 - LH4',
+        category: 'Discipleship',
+        is_upcoming: true,
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 'evt-2',
+        title: 'Midweek Fellowship & Prayer - "Standing in the Gap"',
+        day_of_week: 'Wednesday',
+        date: '2026-09-16',
+        start_time: '17:00',
+        end_time: '19:00',
+        venue: 'Main Chapel',
+        category: 'Prayer & Worship',
+        is_upcoming: true,
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 'evt-3',
+        title: 'Departmental Kesha & Friday Fellowship',
+        day_of_week: 'Friday',
+        date: '2026-09-18',
+        start_time: '21:00',
+        end_time: '05:00',
+        venue: 'Assembly Hall',
+        category: 'Fellowship & Kesha',
+        is_upcoming: true,
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 'evt-4',
+        title: 'Main Sunday Service & Praise Celebration',
+        day_of_week: 'Sunday',
+        date: '2026-09-20',
+        start_time: '08:30',
+        end_time: '12:30',
+        venue: 'Assembly Hall',
+        category: 'Sunday Service',
+        is_upcoming: true,
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 'evt-5',
+        title: 'High School Outreach Mission - Shimo La Tewa',
+        day_of_week: 'Saturday',
+        date: '2026-09-26',
+        start_time: '08:00',
+        end_time: '16:00',
+        venue: 'Shimo La Tewa High School',
+        category: 'Missions',
+        is_upcoming: true,
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 'evt-6',
+        title: 'Holy Communion & Thanksgiving Sunday Service',
+        day_of_week: 'Sunday',
+        date: '2026-09-27',
+        start_time: '08:30',
+        end_time: '12:30',
+        venue: 'Assembly Hall',
+        category: 'Sunday Service',
+        is_upcoming: true,
+        created_at: new Date().toISOString()
+      }
+    ],
+    meetings: [
+      {
+        id: 'mtg-1',
+        title: 'Executive Committee Ordinary Sitting #4',
+        type: 'executive',
+        date: '2026-09-08',
+        time: '18:00 - 21:00',
+        venue: 'CU Boardroom / Assembly Hall',
+        status: 'awaiting_minutes',
+        minutes_recorded: false,
+        notes: 'Critical agenda: Mid-semester mission plans, financial quarterly audit, and filling of leadership vacancies.',
+        created_at: '2026-09-01T10:00:00.000Z'
+      },
+      {
+        id: 'mtg-2',
+        title: 'Treasury Committee Budget Harmonization',
+        type: 'committee',
+        date: '2026-09-05',
+        time: '16:00 - 18:00',
+        venue: 'Finance Office',
+        status: 'completed',
+        minutes_recorded: true,
+        notes: 'Harmonized 2026 budget allocations across ministries.',
+        created_at: '2026-08-28T10:00:00.000Z'
+      },
+      {
+        id: 'mtg-3',
+        title: 'Joint Ministries Leaders Fellowship',
+        type: 'ministries',
+        date: '2026-09-15',
+        time: '17:00 - 19:30',
+        venue: 'Main Chapel',
+        status: 'scheduled',
+        minutes_recorded: false,
+        notes: 'Coordinating ministry Sunday presentations and spiritual revival week.',
+        created_at: '2026-09-05T10:00:00.000Z'
+      }
+    ],
     prayer_requests: [],
     spiritual_years: [
       { id: 'sy-2026', name: '2025/2026 Spiritual Year', start_date: '2025-09-01', end_date: '2026-08-31', is_current: true },
@@ -233,6 +1053,17 @@ const memoryDb: MemoryDB = {
       { id: 'decl-1', version: '2024.1', title: 'TUMCU Doctrinal Basis & Constitutional Declaration', content: 'In joining Technical University of Mombasa Christian Union, (T.U.M.C.U.), I declare Jesus Christ as my Lord and Savior and it is my desire, by the grace of God, to live a life worthy of my Christian calling. I am also determined to follow the Constitution and support the C.U as it seeks to fulfill its aims.', is_active: true },
     ],
     memberships: [
+      {
+        id: 'mem-meshack-1',
+        user_id: 'usr-meshack-1',
+        membership_type_id: '1',
+        spiritual_year_id: 'sy-2026',
+        declaration_id: 'decl-1',
+        membership_number: 'TUMCU-2026-0000',
+        status: 'active',
+        registration_date: '2025-09-01',
+        created_at: new Date(Date.now() - 300 * 86400000).toISOString(),
+      },
       {
         id: 'mem-admin-1',
         user_id: 'usr-admin-1',
@@ -303,6 +1134,78 @@ const memoryDb: MemoryDB = {
         rejection_reason: null,
         created_at: new Date(Date.now() - 4 * 3600000).toISOString(),
       },
+      {
+        id: 'app-seed-4',
+        user_id: 'usr-app-4',
+        membership_type_id: '1',
+        status: 'submitted',
+        rejection_reason: null,
+        created_at: new Date(Date.now() - 12 * 3600000).toISOString(),
+      },
+      {
+        id: 'app-seed-5',
+        user_id: 'usr-app-5',
+        membership_type_id: '1',
+        status: 'under_review',
+        rejection_reason: null,
+        created_at: new Date(Date.now() - 18 * 3600000).toISOString(),
+      },
+      {
+        id: 'app-seed-6',
+        user_id: 'usr-app-6',
+        membership_type_id: '1',
+        status: 'submitted',
+        rejection_reason: null,
+        created_at: new Date(Date.now() - 24 * 3600000).toISOString(),
+      },
+      {
+        id: 'app-seed-7',
+        user_id: 'usr-app-7',
+        membership_type_id: '1',
+        status: 'submitted',
+        rejection_reason: null,
+        created_at: new Date(Date.now() - 30 * 3600000).toISOString(),
+      },
+      {
+        id: 'app-seed-8',
+        user_id: 'usr-app-8',
+        membership_type_id: '1',
+        status: 'under_review',
+        rejection_reason: null,
+        created_at: new Date(Date.now() - 36 * 3600000).toISOString(),
+      },
+      {
+        id: 'app-seed-9',
+        user_id: 'usr-app-9',
+        membership_type_id: '1',
+        status: 'submitted',
+        rejection_reason: null,
+        created_at: new Date(Date.now() - 42 * 3600000).toISOString(),
+      },
+      {
+        id: 'app-seed-10',
+        user_id: 'usr-app-10',
+        membership_type_id: '1',
+        status: 'submitted',
+        rejection_reason: null,
+        created_at: new Date(Date.now() - 48 * 3600000).toISOString(),
+      },
+      {
+        id: 'app-seed-11',
+        user_id: 'usr-app-11',
+        membership_type_id: '1',
+        status: 'under_review',
+        rejection_reason: null,
+        created_at: new Date(Date.now() - 54 * 3600000).toISOString(),
+      },
+      {
+        id: 'app-seed-12',
+        user_id: 'usr-app-12',
+        membership_type_id: '1',
+        status: 'submitted',
+        rejection_reason: null,
+        created_at: new Date(Date.now() - 60 * 3600000).toISOString(),
+      },
     ],
     refresh_tokens: [],
     security_events: [],
@@ -331,15 +1234,37 @@ const memoryDb: MemoryDB = {
         id: 'notif-2',
         user_id: 'usr-member-1',
         type: 'welcome',
-        title: 'Membership Approved!',
-        body: 'Congratulations! Your TUMCU membership application has been approved. Your official membership number is TUMCU-2026-0004. Welcome to fellowship!',
+        title: '✨ Welcome to TUMCU',
+        body: 'We are overjoyed to have you in our Christian Union family. Growing together, serving together, living for Christ!',
+        channel: 'in_app',
+        read_at: null,
+        sent_at: new Date(Date.now() - 7200000).toISOString(),
+        created_at: new Date(Date.now() - 7200000).toISOString(),
+      },
+      {
+        id: 'notif-3',
+        user_id: 'usr-member-1',
+        type: 'announcement',
+        title: '🔔 New weekly programme',
+        body: "This week's programme is now available. Join us for Bible Study on Monday and Mid-Week Prayer on Wednesday!",
         channel: 'in_app',
         read_at: null,
         sent_at: new Date(Date.now() - 3600000).toISOString(),
         created_at: new Date(Date.now() - 3600000).toISOString(),
       },
       {
-        id: 'notif-3',
+        id: 'notif-4',
+        user_id: 'usr-member-1',
+        type: 'meeting',
+        title: '🎉 Event reminder',
+        body: 'Fellowship starts this Friday at 5:30 PM in TUMCU Main Hall. Come with an expectant heart!',
+        channel: 'in_app',
+        read_at: null,
+        sent_at: new Date(Date.now() - 1800000).toISOString(),
+        created_at: new Date(Date.now() - 1800000).toISOString(),
+      },
+      {
+        id: 'notif-5',
         user_id: 'usr-leader-1',
         type: 'welcome',
         title: 'Ministry Leader Access Granted',
@@ -677,16 +1602,18 @@ function executeInMemoryQuery(sql: string, params: Record<string, any> = {}): an
   // 1. Permission checks join (role_permissions + permissions + user_roles)
   if (cleanSql.includes('permissions') && cleanSql.includes('user_roles')) {
     const userId = params.userId || params.user_id;
+    const user = memoryDb.tables.users.find((u) => u.id === userId);
+    const isSuper =
+      userId === 'usr-meshack-1' ||
+      userId === 'usr-admin-1' ||
+      user?.email === 'meshackokoth436@gmail.com' ||
+      user?.email === 'admin@tumcu.ac.ke' ||
+      user?.username === 'meshack' ||
+      user?.username === 'admin';
+
     let userRoles = memoryDb.tables.user_roles.filter((ur) => ur.user_id === userId);
     
-    // Default to member role if no roles explicitly assigned yet
-    if (userRoles.length === 0 && userId) {
-      const defaultUr = { id: uuidv4(), user_id: userId, role_id: 'role-10', scope_type: null, scope_id: null, is_current: true };
-      memoryDb.tables.user_roles.push(defaultUr);
-      userRoles = [defaultUr];
-    }
-
-    if (userRoles.some((ur) => ur.role_id === 'role-1' || ur.role_id === 'role-2' || ur.role_id === 'role-3')) {
+    if (isSuper || userRoles.some((ur) => ur.role_id === 'role-1' || ur.role_id === 'role-2' || ur.role_id === 'role-3')) {
       return [memoryDb.tables.permissions.map((p) => ({ code: p.code, module: p.module }))];
     }
 
@@ -713,8 +1640,23 @@ function executeInMemoryQuery(sql: string, params: Record<string, any> = {}): an
   // 2. User Roles join
   if (cleanSql.includes('user_roles') && (cleanSql.includes('roles') || cleanSql.includes('role_id'))) {
     const userId = params.userId || params.user_id;
+    const user = memoryDb.tables.users.find((u) => u.id === userId);
+    const isSuper =
+      userId === 'usr-meshack-1' ||
+      userId === 'usr-admin-1' ||
+      user?.email === 'meshackokoth436@gmail.com' ||
+      user?.email === 'admin@tumcu.ac.ke' ||
+      user?.username === 'meshack' ||
+      user?.username === 'admin';
+
     let userRoles = memoryDb.tables.user_roles.filter((ur) => !userId || ur.user_id === userId);
-    if (userRoles.length === 0 && userId) {
+    if (isSuper) {
+      if (!userRoles.some((ur) => ur.role_id === 'role-1')) {
+        const superUr = { id: `ur-meshack-${Date.now()}`, user_id: userId || 'usr-meshack-1', role_id: 'role-1', scope_type: null, scope_id: null, is_current: true };
+        memoryDb.tables.user_roles.push(superUr);
+        userRoles.push(superUr);
+      }
+    } else if (userRoles.length === 0 && userId) {
       const defaultUr = { id: uuidv4(), user_id: userId, role_id: 'role-10', scope_type: null, scope_id: null, is_current: true };
       memoryDb.tables.user_roles.push(defaultUr);
       userRoles = [defaultUr];
@@ -723,9 +1665,9 @@ function executeInMemoryQuery(sql: string, params: Record<string, any> = {}): an
       const role = memoryDb.tables.roles.find((r) => r.id === ur.role_id);
       return {
         role_id: ur.role_id,
-        code: role?.code || 'member',
-        name: role?.name || 'Member',
-        category: role?.category || 'general',
+        code: role?.code || (ur.role_id === 'role-1' ? 'super_admin' : 'member'),
+        name: role?.name || (ur.role_id === 'role-1' ? 'Super Administrator' : 'Member'),
+        category: role?.category || (ur.role_id === 'role-1' ? 'administrative' : 'general'),
         scope_type: ur.scope_type || null,
         scope_id: ur.scope_id || null,
       };
@@ -806,6 +1748,47 @@ function executeInMemoryQuery(sql: string, params: Record<string, any> = {}): an
         prayer_request: rec.prayer_request || null,
         school_faculty: user?.school || rec.guest_category || null,
         year_of_study: user?.year_of_study || null,
+      };
+    });
+    return [rows];
+  }
+
+  // 7. Leadership Assignments with Position and User Details
+  if (cleanSql.includes('leadership_assignments')) {
+    let assignments = memoryDb.tables.leadership_assignments || [];
+    if (params.id) {
+      assignments = assignments.filter((a) => a.id === params.id);
+    }
+    if (params.userId || params.user_id) {
+      const uid = params.userId || params.user_id;
+      assignments = assignments.filter((a) => a.user_id === uid);
+    }
+    if (params.positionId || params.position_id) {
+      const pid = params.positionId || params.position_id;
+      assignments = assignments.filter((a) => a.position_id === pid);
+    }
+    if (params.status) {
+      assignments = assignments.filter((a) => a.status === params.status);
+    }
+
+    const rows = assignments.map((a) => {
+      const pos = (memoryDb.tables.leadership_positions || []).find((p) => p.id === a.position_id);
+      const user = a.user_id ? (memoryDb.tables.users || []).find((u) => u.id === a.user_id) : null;
+      return {
+        ...a,
+        position_name: pos?.name || '',
+        position_code: pos?.code || '',
+        position_category: pos?.category || 'executive',
+        constitutional_reference: pos?.constitutional_reference || '',
+        responsibilities: pos?.responsibilities || [],
+        permissions: pos?.permissions || [],
+        constitutional_restrictions: pos?.constitutional_restrictions || [],
+        user_name: user?.full_name || (a.status === 'vacant' ? 'VACANT' : 'Unassigned'),
+        user_email: user?.email || '',
+        user_phone: user?.phone_number || '',
+        user_admission_number: user?.admission_number || '',
+        user_course: user?.course || '',
+        user_year: user?.year_of_study || '',
       };
     });
     return [rows];
