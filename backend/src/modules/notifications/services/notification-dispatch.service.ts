@@ -58,6 +58,10 @@ export class NotificationDispatchService {
     return this.repository.markRead(id, userId);
   }
 
+  markAllRead(userId: string) {
+    return this.repository.markAllRead(userId);
+  }
+
   countUnread(userId: string) {
     return this.repository.countUnread(userId);
   }

@@ -39,6 +39,7 @@ export interface User {
   failed_login_attempts: number;
   locked_until: string | null;
   password_changed_at: string | null;
+  deleted_at?: string | null;
   created_at: string;
   updated_at: string;
 }

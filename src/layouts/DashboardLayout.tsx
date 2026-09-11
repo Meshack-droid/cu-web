@@ -20,6 +20,7 @@ import {
   Home,
   ArrowLeft,
   ArrowRight,
+  Scale,
 } from 'lucide-react';
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
@@ -37,6 +38,7 @@ const memberLinks = [
   { to: '/dashboard/attendance', label: 'Attendance & QR', icon: QrCode },
   { to: '/dashboard/ministry-portal', label: 'Ministry Leader Hub', icon: Church },
   { to: '/dashboard/elections', label: 'Elections & Ballot', icon: Vote },
+  { to: '/dashboard/constitution', label: 'Constitution 2024', icon: Scale },
   { to: '/dashboard/sermons', label: 'Sermons & Giving', icon: Headphones },
   { to: '/dashboard/prayer', label: 'Prayer Requests', icon: HandHeart },
   { to: '/dashboard/finance', label: 'Finance & Requests', icon: WalletCards },
@@ -175,21 +177,24 @@ function Sidebar({
           <ArrowRight size={14} className="ml-auto text-slate-400" />
         </Link>
 
-        <button
-          onClick={() => {
-            onClose?.();
-            onOpenSundayQr?.();
-          }}
-          className="w-full flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 px-3.5 py-2.5 text-xs font-black text-slate-950 shadow-md shadow-amber-500/20 hover:from-amber-400 hover:to-amber-500 transition active:scale-98"
-        >
-          <span className="grid h-7 w-7 place-items-center rounded-xl bg-slate-950/10">
-            <QrCode size={16} />
-          </span>
-          <span className="truncate">Sunday Service QR</span>
-          <span className="ml-auto rounded-full bg-slate-950/15 px-2 py-0.5 text-[10px] font-bold">
-            Live
-          </span>
-        </button>
+        {/* Sunday Service QR: Only shown for Super Admin */}
+        {(user?.role === 'super_admin' || user?.role === 'admin') && (
+          <button
+            onClick={() => {
+              onClose?.();
+              onOpenSundayQr?.();
+            }}
+            className="w-full flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 px-3.5 py-2.5 text-xs font-black text-slate-950 shadow-md shadow-amber-500/20 hover:from-amber-400 hover:to-amber-500 transition active:scale-98"
+          >
+            <span className="grid h-7 w-7 place-items-center rounded-xl bg-slate-950/10">
+              <QrCode size={16} />
+            </span>
+            <span className="truncate">Sunday Service QR</span>
+            <span className="ml-auto rounded-full bg-slate-950/15 px-2 py-0.5 text-[10px] font-bold">
+              Live
+            </span>
+          </button>
+        )}
 
         <button
           onClick={() => {

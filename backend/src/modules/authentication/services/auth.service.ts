@@ -202,11 +202,15 @@ export class AuthService {
     await this.repository.revokeAllRefreshTokens(userId);
   }
 
+  async getUserById(userId: string) {
+    return this.repository.findById(userId);
+  }
+
   private async issueTokens(userId: string, username: string) {
     const accessToken = jwt.sign({ sub: userId, username }, env.JWT_ACCESS_SECRET, {
       expiresIn: env.JWT_ACCESS_EXPIRES_IN as jwt.SignOptions['expiresIn'],
     });
-    const refreshToken = jwt.sign({ sub: userId }, env.JWT_REFRESH_SECRET, {
+    const refreshToken = jwt.sign({ sub: userId, jti: uuidv4() }, env.JWT_REFRESH_SECRET, {
       expiresIn: env.JWT_REFRESH_EXPIRES_IN as jwt.SignOptions['expiresIn'],
     });
 

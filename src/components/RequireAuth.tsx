@@ -8,6 +8,7 @@ export function RequireAuth() {
   const accessToken = useAuthStore((s) => s.accessToken);
   const setPermissions = useAuthStore((s) => s.setPermissions);
   const setRoles = useAuthStore((s) => s.setRoles);
+  const setUser = useAuthStore((s) => s.setUser);
   const logout = useAuthStore((s) => s.logout);
   const [checking, setChecking] = useState(Boolean(isAuthenticated && accessToken));
 
@@ -20,6 +21,9 @@ export function RequireAuth() {
     fetchCurrentSession()
       .then((session) => {
         if (!mounted) return;
+        if (session.user || (session as any).email) {
+          setUser((session.user || session) as any);
+        }
         setPermissions((session.permissions as string[]) ?? []);
         setRoles((session.roles as Parameters<typeof setRoles>[0]) ?? []);
       })
@@ -28,7 +32,7 @@ export function RequireAuth() {
       })
       .finally(() => mounted && setChecking(false));
     return () => { mounted = false; };
-  }, [accessToken, isAuthenticated, logout, setPermissions, setRoles]);
+  }, [accessToken, isAuthenticated, logout, setPermissions, setRoles, setUser]);
 
   if (checking) return <div className="grid min-h-screen place-items-center bg-[#f4f7f5]"><div className="rounded-2xl border border-white/70 bg-white/70 px-5 py-3 text-sm font-semibold text-primary-800 shadow-xl backdrop-blur-xl">Securing your session…</div></div>;
   if (!isAuthenticated) return <Navigate to="/login" replace />;

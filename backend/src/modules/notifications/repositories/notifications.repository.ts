@@ -44,6 +44,12 @@ export class NotificationsRepository {
     });
   }
 
+  async markAllRead(userId: string): Promise<void> {
+    await query(`UPDATE notifications SET read_at = NOW() WHERE user_id = :userId AND read_at IS NULL`, {
+      userId,
+    });
+  }
+
   async countUnread(userId: string): Promise<number> {
     const rows = await query<{ count: number }[]>(
       `SELECT COUNT(*) as count FROM notifications WHERE user_id = :userId AND read_at IS NULL`,

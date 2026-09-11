@@ -4,6 +4,7 @@ import { sendSuccess } from '../../../utils/response';
 import { asyncHandler } from '../../../utils/asyncHandler';
 import { AuthenticationError } from '../../../utils/errors';
 import { query } from '../../../config/database';
+import { toPublicUser } from '../interfaces/user.interface';
 
 const authService = new AuthService();
 
@@ -48,6 +49,11 @@ export const authController = {
 
   me: asyncHandler(async (req: Request, res: Response) => {
     if (!req.user) throw new AuthenticationError();
+    const user = await authService.getUserById(req.user.sub);
+    if (!user || user.deleted_at) {
+      throw new AuthenticationError('User no longer exists');
+    }
+
     const roles = await query<{ code: string; name: string; category: string; scope_type: string; scope_id: string | null }[]>(
       `SELECT r.code, r.name, r.category, ur.scope_type, ur.scope_id
          FROM user_roles ur
@@ -57,9 +63,17 @@ export const authController = {
       { userId: req.user.sub }
     );
 
+    const publicUser = toPublicUser(user);
     return sendSuccess(
       res,
-      { ...req.user, permissions: Array.from(req.permissions ?? []), roles },
+      {
+        ...publicUser,
+        user: publicUser,
+        sub: user.id,
+        username: user.username,
+        permissions: Array.from(req.permissions ?? []),
+        roles,
+      },
       'Current session'
     );
   }),

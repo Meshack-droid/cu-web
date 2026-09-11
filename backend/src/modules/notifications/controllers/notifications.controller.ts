@@ -31,4 +31,10 @@ export const notificationsController = {
     await service.markRead(req.params.id, req.user.sub);
     return sendSuccess(res, null, 'Notification marked read');
   }),
+
+  markAllRead: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) throw new AuthenticationError();
+    await service.markAllRead(req.user.sub);
+    return sendSuccess(res, null, 'All notifications marked read');
+  }),
 };

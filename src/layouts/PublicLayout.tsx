@@ -9,7 +9,9 @@ const navLinks = [
   { to: '/about', label: 'About' },
   { to: '/ministries', label: 'Ministries' },
   { to: '/events', label: 'Events' },
-  { to: '/sermons', label: 'Sermons & Word' },
+  { to: '/membership', label: 'Membership' },
+  { to: '/constitution', label: 'Constitution' },
+  { to: '/resources', label: 'Resources' },
   { to: '/elections', label: 'Elections' },
   { to: '/contact', label: 'Contact' },
 ];
@@ -107,8 +109,8 @@ export function PublicLayout() {
             <div className="flex items-center gap-3"><img src={tumcuLogo} alt="TUMCU logo" className="h-12 w-12 rounded-full bg-white/90 p-1" /><div><div className="font-black tracking-wide">TUMCU</div><div className="text-xs text-white/60">Christian Union</div></div></div>
             <p className="mt-5 max-w-md text-sm leading-7 text-white/65">A Christ-centred university community committed to prayer, the Word, fellowship, service and mission.</p>
           </div>
-          <div><h3 className="font-bold">Explore</h3><div className="mt-4 space-y-3 text-sm text-white/65">{navLinks.slice(1,4).map((l) => <Link className="block hover:text-gold-400" key={l.to} to={l.to}>{l.label}</Link>)}</div></div>
-          <div><h3 className="font-bold">Connect</h3><div className="mt-4 space-y-3 text-sm text-white/65"><Link className="block hover:text-gold-400" to="/register">Become a member</Link><Link className="block hover:text-gold-400" to="/contact">Contact the Union</Link><Link className="block hover:text-gold-400" to="/events">See upcoming events</Link></div></div>
+          <div><h3 className="font-bold">Explore</h3><div className="mt-4 space-y-3 text-sm text-white/65"><Link className="block hover:text-gold-400" to="/about">About TUMCU</Link><Link className="block hover:text-gold-400" to="/ministries">Ministries</Link><Link className="block hover:text-gold-400" to="/constitution">TUMCU Constitution 2024</Link><Link className="block hover:text-gold-400" to="/resources">Sermons & Resources</Link></div></div>
+          <div><h3 className="font-bold">Connect</h3><div className="mt-4 space-y-3 text-sm text-white/65"><Link className="block hover:text-gold-400" to="/register">Become a Member</Link><Link className="block hover:text-gold-400" to="/elections">Leadership & Nominations</Link><Link className="block hover:text-gold-400" to="/events">See Upcoming Events</Link><Link className="block hover:text-gold-400" to="/contact">Contact the Union</Link></div></div>
         </div>
         <div className="border-t border-white/10"><div className="page-shell py-5 text-xs text-white/45">© {new Date().getFullYear()} Technical University of Mombasa Christian Union. All rights reserved.</div></div>
       </footer>

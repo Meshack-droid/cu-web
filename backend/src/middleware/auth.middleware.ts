@@ -82,7 +82,7 @@ export async function loadPermissions(req: Request, _res: Response, next: NextFu
   ]);
 
   const isSuperAdmin =
-    userRoles.some((r) => r.role_id === 'role-1' || r.role_id === 'role-superadmin') ||
+    userRoles.some((r) => r.role_id === 'role-1' || r.role_id === 'role-2' || r.role_id === 'role-3' || r.role_id === 'role-superadmin') ||
     req.user.username === 'admin' ||
     req.user.sub === 'usr-admin-1';
 
@@ -90,7 +90,24 @@ export async function loadPermissions(req: Request, _res: Response, next: NextFu
     const allPerms = await query<{ code: string }[]>('SELECT code FROM permissions');
     req.permissions = new Set(allPerms.map((p) => p.code));
   } else {
-    req.permissions = new Set(permissionRows.map((r) => r.code));
+    const perms = new Set(permissionRows.map((r) => r.code));
+    // Base constitutional access rights for all authenticated TUMCU members (Art. 5)
+    const baseMemberPermissions = [
+      'meetings.view',
+      'attendance.view',
+      'attendance.record',
+      'events.view',
+      'events.register',
+      'events.check_in',
+      'prayer.view',
+      'prayer.create',
+      'ministries.view',
+      'finance.request',
+    ];
+    for (const code of baseMemberPermissions) {
+      perms.add(code);
+    }
+    req.permissions = perms;
   }
   req.scopedAccess = {
     ministryIds: new Set(scopeRows.filter((r) => r.scope_type === 'ministry').map((r) => r.scope_id)),

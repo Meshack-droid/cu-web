@@ -77,12 +77,12 @@ export class MembershipService {
         { userId: application.user_id, assignedBy: reviewerId } as never
       );
 
-      // Welcome notification — queued for the background job worker (Chapter 75).
+      // Welcome notification
       await conn.query(
         `INSERT INTO notifications (id, user_id, type, title, body, channel)
-         VALUES (UUID(), :userId, 'welcome', 'Welcome to TUMCU!',
-                 CONCAT('Your membership has been approved. Your membership number is ', :membershipNumber, '.'),
-                 'email')`,
+         VALUES (UUID(), :userId, 'welcome', 'Membership Approved!',
+                 CONCAT('Congratulations! Your TUMCU membership application has been approved. Your official membership number is ', :membershipNumber, '. Welcome to fellowship!'),
+                 'in_app')`,
         { userId: application.user_id, membershipNumber } as never
       );
 

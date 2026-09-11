@@ -27,9 +27,9 @@ export interface DashboardWritings {
 }
 
 const DEFAULT_WRITINGS: DashboardWritings = {
-  heroEyebrow: 'TUMCU EXECUTIVE & SUPER ADMIN OVERSIGHT',
-  heroTitle: 'Welcome back, Super Admin.',
-  heroSubtitle: 'Complete executive visibility: live tallies, membership registry, event management, and Sunday service attendance QR codes.',
+  heroEyebrow: 'Technical University of Mombasa Christian Union',
+  heroTitle: 'Welcome back',
+  heroSubtitle: 'Fellowship oversight, membership registry, ministry activities, meetings, and Sunday service attendance.',
   spiritualTheme: 'Spiritual Year 2026/2027: "Rooted & Grounded in Christ" — Colossians 2:6-7',
   verseOfTheWeek: 'Let all things be done decently and in order. — 1 Corinthians 14:40',
   announcementTitle: 'Important Constitutional Notice',
@@ -115,7 +115,7 @@ export const useDashboardStore = create<DashboardStoreState>()(
       clearAuditLogs: () => set({ auditLogs: [] }),
     }),
     {
-      name: 'tumcu-dashboard-store-v2',
+      name: 'tumcu-dashboard-store-v3',
     }
   )
 );

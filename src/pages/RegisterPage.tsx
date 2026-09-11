@@ -10,8 +10,7 @@ import { register as registerApi, type RegisterPayload } from '@/features/auth/a
 const STEPS = ['Personal Details', 'University Information', 'Membership Declaration', 'Review'];
 
 const DECLARATION_TEXT =
-  'I declare Jesus Christ as my Lord and Savior and commit to upholding the mission, vision, ' +
-  'and values of the Technical University of Mombasa Christian Union as set out in its constitution.';
+  'In joining Technical University of Mombasa Christian Union, (T.U.M.C.U.), I declare Jesus Christ as my Lord and Savior and it is my desire, by the grace of God, to live a life worthy of my Christian calling. I am also determined to follow the Constitution and support the C.U as it seeks to fulfill its aims.';
 
 export function RegisterPage() {
   const navigate = useNavigate();

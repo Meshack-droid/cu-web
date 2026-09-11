@@ -230,7 +230,7 @@ const memoryDb: MemoryDB = {
       { id: 'sy-2026', name: '2025/2026 Spiritual Year', start_date: '2025-09-01', end_date: '2026-08-31', is_current: true },
     ],
     membership_declarations: [
-      { id: 'decl-1', version: '2026.1', title: 'TUMCU Doctrinal Basis & Member Commitment', content: 'I affirm faith in Jesus Christ as Lord and Saviour and agree to live by Scripture and uphold TUMCU fellowship.', is_active: true },
+      { id: 'decl-1', version: '2024.1', title: 'TUMCU Doctrinal Basis & Constitutional Declaration', content: 'In joining Technical University of Mombasa Christian Union, (T.U.M.C.U.), I declare Jesus Christ as my Lord and Savior and it is my desire, by the grace of God, to live a life worthy of my Christian calling. I am also determined to follow the Constitution and support the C.U as it seeks to fulfill its aims.', is_active: true },
     ],
     memberships: [
       {
@@ -315,6 +315,41 @@ const memoryDb: MemoryDB = {
     assets: [],
     library_resources: [],
     broadcast_messages: [],
+    notifications: [
+      {
+        id: 'notif-1',
+        user_id: 'usr-admin-1',
+        type: 'welcome',
+        title: 'Welcome to TUMCU Portal',
+        body: 'You have full administrative and constitutional oversight access to the Technical University of Mombasa Christian Union platform.',
+        channel: 'in_app',
+        read_at: null,
+        sent_at: new Date(Date.now() - 3600000).toISOString(),
+        created_at: new Date(Date.now() - 3600000).toISOString(),
+      },
+      {
+        id: 'notif-2',
+        user_id: 'usr-member-1',
+        type: 'welcome',
+        title: 'Membership Approved!',
+        body: 'Congratulations! Your TUMCU membership application has been approved. Your official membership number is TUMCU-2026-0004. Welcome to fellowship!',
+        channel: 'in_app',
+        read_at: null,
+        sent_at: new Date(Date.now() - 3600000).toISOString(),
+        created_at: new Date(Date.now() - 3600000).toISOString(),
+      },
+      {
+        id: 'notif-3',
+        user_id: 'usr-leader-1',
+        type: 'welcome',
+        title: 'Ministry Leader Access Granted',
+        body: 'Welcome to your Ministry Leader portal! You can now manage your ministry roster, view attendance, and submit ministry reports.',
+        channel: 'in_app',
+        read_at: null,
+        sent_at: new Date(Date.now() - 3600000).toISOString(),
+        created_at: new Date(Date.now() - 3600000).toISOString(),
+      },
+    ],
     elections: [
       {
         id: 'elec-2026',
@@ -542,36 +577,76 @@ const memoryDb: MemoryDB = {
   },
 };
 
-// Seed all permissions to Super Admin role in memory
-for (const p of memoryDb.tables.permissions) {
-  memoryDb.tables.role_permissions.push({
-    id: uuidv4(),
-    role_id: 'role-1',
-    permission_id: p.id,
-  });
-}
+// Seed role permissions in memory
+const rolePermissionMap: Record<string, string[]> = {
+  // Super Admin
+  'role-1': memoryDb.tables.permissions.map((p) => p.code),
+  // System Admin
+  'role-2': memoryDb.tables.permissions.map((p) => p.code),
+  // Chairperson
+  'role-3': memoryDb.tables.permissions.map((p) => p.code),
+  // 1st Vice Chairperson
+  'role-4': [
+    'welfare.view', 'welfare.create', 'welfare.edit', 'welfare.approve',
+    'reports.view', 'leadership.view', 'ministries.view', 'committees.view',
+    'membership.view_all', 'meetings.view', 'events.view', 'events.register',
+    'attendance.view', 'attendance.record', 'prayer.view', 'prayer.create', 'finance.request'
+  ],
+  // 2nd Vice Chairperson
+  'role-5': [
+    'associates.view', 'associates.manage', 'ministries.view', 'ministries.manage_members',
+    'meetings.view', 'events.view', 'events.register', 'attendance.view', 'attendance.record',
+    'prayer.view', 'prayer.create', 'finance.request'
+  ],
+  // Secretary
+  'role-6': [
+    'membership.create', 'membership.review', 'membership.view_all', 'membership.edit', 'membership.approve',
+    'meetings.view', 'meetings.create', 'meetings.edit', 'meetings.delete', 'meetings.manage_minutes', 'meetings.approve_minutes',
+    'attendance.view', 'attendance.record', 'attendance.manage_sessions', 'attendance.export',
+    'communication.view', 'communication.create', 'communication.edit', 'communication.delete',
+    'reports.create', 'reports.view', 'ministries.view', 'ministries.manage_members', 'ministries.edit',
+    'leadership.view', 'leadership.assign', 'events.view', 'events.create', 'events.edit', 'events.register',
+    'prayer.view', 'prayer.create', 'finance.view', 'finance.request'
+  ],
+  // Treasurer
+  'role-7': [
+    'finance.view', 'finance.request', 'finance.approve', 'reports.create', 'reports.view',
+    'meetings.view', 'events.view', 'events.register', 'attendance.view', 'attendance.record',
+    'prayer.view', 'prayer.create', 'assets.view'
+  ],
+  // Prayer Committee Chairperson
+  'role-8': [
+    'prayer.view', 'prayer.view_confidential', 'prayer.create', 'prayer.edit', 'prayer.delete',
+    'meetings.view', 'events.view', 'events.register', 'attendance.view', 'attendance.record',
+    'ministries.view', 'finance.request'
+  ],
+  // Ministry Leader
+  'role-9': [
+    'ministries.view', 'ministries.manage_members', 'ministries.edit',
+    'meetings.view', 'meetings.create', 'attendance.view', 'attendance.record', 'attendance.manage_sessions',
+    'reports.create', 'reports.view', 'events.view', 'events.register', 'prayer.view', 'prayer.create',
+    'finance.view', 'finance.request'
+  ],
+  // Member
+  'role-10': [
+    'events.view', 'events.register', 'events.check_in', 'ministries.view',
+    'prayer.view', 'prayer.create', 'attendance.view', 'attendance.record',
+    'meetings.view', 'finance.request'
+  ]
+};
 
-// Seed default permissions for member role (role-10)
-const memberPermCodes = [
-  'events.view',
-  'events.register',
-  'events.check_in',
-  'ministries.view',
-  'prayer.view',
-  'prayer.create',
-  'attendance.view',
-  'attendance.record',
-  'meetings.view',
-  'finance.request',
-];
-for (const code of memberPermCodes) {
-  const perm = memoryDb.tables.permissions.find((p) => p.code === code);
-  if (perm) {
-    memoryDb.tables.role_permissions.push({
-      id: uuidv4(),
-      role_id: 'role-10',
-      permission_id: perm.id,
-    });
+const memberPermCodes = rolePermissionMap['role-10'];
+
+for (const [roleId, codes] of Object.entries(rolePermissionMap)) {
+  for (const code of codes) {
+    const perm = memoryDb.tables.permissions.find((p) => p.code === code);
+    if (perm) {
+      memoryDb.tables.role_permissions.push({
+        id: uuidv4(),
+        role_id: roleId,
+        permission_id: perm.id,
+      });
+    }
   }
 }
 
@@ -602,29 +677,52 @@ function executeInMemoryQuery(sql: string, params: Record<string, any> = {}): an
   // 1. Permission checks join (role_permissions + permissions + user_roles)
   if (cleanSql.includes('permissions') && cleanSql.includes('user_roles')) {
     const userId = params.userId || params.user_id;
-    const userRole = memoryDb.tables.user_roles.find((ur) => ur.user_id === userId);
-    if (!userRole) return [[]];
+    let userRoles = memoryDb.tables.user_roles.filter((ur) => ur.user_id === userId);
+    
+    // Default to member role if no roles explicitly assigned yet
+    if (userRoles.length === 0 && userId) {
+      const defaultUr = { id: uuidv4(), user_id: userId, role_id: 'role-10', scope_type: null, scope_id: null, is_current: true };
+      memoryDb.tables.user_roles.push(defaultUr);
+      userRoles = [defaultUr];
+    }
 
-    if (userRole.role_id === 'role-1' || userRole.role_id === 'role-3') {
+    if (userRoles.some((ur) => ur.role_id === 'role-1' || ur.role_id === 'role-2' || ur.role_id === 'role-3')) {
       return [memoryDb.tables.permissions.map((p) => ({ code: p.code, module: p.module }))];
     }
 
-    const assigned = memoryDb.tables.role_permissions
-      .filter((rp) => rp.role_id === userRole.role_id)
-      .map((rp) => memoryDb.tables.permissions.find((p) => p.id === rp.permission_id))
-      .filter(Boolean)
-      .map((p) => ({ code: p!.code, module: p!.module }));
+    const assignedRoleIds = new Set(userRoles.map((ur) => ur.role_id));
+    // Always include member role permissions as baseline
+    assignedRoleIds.add('role-10');
 
-    return [assigned];
+    const permMap = new Map<string, { code: string; module: string }>();
+    for (const roleId of assignedRoleIds) {
+      const perms = memoryDb.tables.role_permissions
+        .filter((rp) => rp.role_id === roleId)
+        .map((rp) => memoryDb.tables.permissions.find((p) => p.id === rp.permission_id))
+        .filter(Boolean);
+      for (const p of perms) {
+        if (p && !permMap.has(p.code)) {
+          permMap.set(p.code, { code: p.code, module: p.module });
+        }
+      }
+    }
+
+    return [Array.from(permMap.values())];
   }
 
   // 2. User Roles join
-  if (cleanSql.includes('user_roles') && cleanSql.includes('roles')) {
+  if (cleanSql.includes('user_roles') && (cleanSql.includes('roles') || cleanSql.includes('role_id'))) {
     const userId = params.userId || params.user_id;
-    const userRoles = memoryDb.tables.user_roles.filter((ur) => !userId || ur.user_id === userId);
+    let userRoles = memoryDb.tables.user_roles.filter((ur) => !userId || ur.user_id === userId);
+    if (userRoles.length === 0 && userId) {
+      const defaultUr = { id: uuidv4(), user_id: userId, role_id: 'role-10', scope_type: null, scope_id: null, is_current: true };
+      memoryDb.tables.user_roles.push(defaultUr);
+      userRoles = [defaultUr];
+    }
     const rows = userRoles.map((ur) => {
       const role = memoryDb.tables.roles.find((r) => r.id === ur.role_id);
       return {
+        role_id: ur.role_id,
         code: role?.code || 'member',
         name: role?.name || 'Member',
         category: role?.category || 'general',
@@ -632,7 +730,7 @@ function executeInMemoryQuery(sql: string, params: Record<string, any> = {}): an
         scope_id: ur.scope_id || null,
       };
     });
-    return [rows.length > 0 ? rows : [{ code: 'member', name: 'Member', category: 'general', scope_type: null, scope_id: null }]];
+    return [rows.length > 0 ? rows : [{ role_id: 'role-10', code: 'member', name: 'Member', category: 'general', scope_type: null, scope_id: null }]];
   }
 
   // 3. User Scopes check
@@ -788,6 +886,33 @@ function executeInMemoryQuery(sql: string, params: Record<string, any> = {}): an
       row.revokedAt = null;
     }
 
+    // Specific mapping for notifications
+    if (table === 'notifications') {
+      const uId = params.userId || params.user_id;
+      row.user_id = uId;
+      row.userId = uId;
+      if (!row.type) {
+        row.type = cleanSql.includes("'welcome'") ? 'welcome' : (params.type || 'system');
+      }
+      if (!row.title) {
+        if (cleanSql.includes("'Membership Approved!'")) row.title = 'Membership Approved!';
+        else if (cleanSql.includes("'Welcome to TUMCU!'")) row.title = 'Welcome to TUMCU!';
+        else row.title = params.title || 'Welcome to TUMCU!';
+      }
+      if (!row.body) {
+        if (params.membershipNumber) {
+          row.body = `Congratulations! Your TUMCU membership application has been approved. Your official membership number is ${params.membershipNumber}. Welcome to fellowship!`;
+        } else {
+          row.body = params.body || 'Welcome to the Technical University of Mombasa Christian Union portal.';
+        }
+      }
+      if (!row.channel) {
+        row.channel = cleanSql.includes("'email'") ? 'email' : 'in_app';
+      }
+      if (row.read_at === undefined) row.read_at = null;
+      if (row.sent_at === undefined) row.sent_at = new Date().toISOString();
+    }
+
     // Check unique constraints / on duplicate key
     const existingIndex = memoryDb.tables[table]?.findIndex((r) =>
       r.id === row.id ||
@@ -833,10 +958,33 @@ function executeInMemoryQuery(sql: string, params: Record<string, any> = {}): an
         }
       } else if (table === 'users' && (params.userId || params.user_id) && records[i].id === (params.userId || params.user_id)) {
         matches = true;
+      } else if (table === 'notifications') {
+        const uId = params.userId || params.user_id;
+        if (params.id && records[i].id === params.id) {
+          if (!uId || records[i].user_id === uId || records[i].userId === uId) {
+            matches = true;
+          }
+        } else if (!params.id && uId && (records[i].user_id === uId || records[i].userId === uId)) {
+          if (cleanSql.includes('read_at IS NULL') || upperSql.includes('READ_AT IS NULL')) {
+            if (!records[i].read_at && !records[i].readAt) {
+              matches = true;
+            }
+          } else {
+            matches = true;
+          }
+        }
       }
 
       if (matches) {
         const updatePayload: Record<string, any> = { ...params, updated_at: nowIso };
+        if (cleanSql.includes('read_at = NOW()') || upperSql.includes('READ_AT = NOW()') || cleanSql.includes('read_at = now()')) {
+          updatePayload.read_at = nowIso;
+          updatePayload.readAt = nowIso;
+        }
+        if (cleanSql.includes('sent_at = NOW()') || upperSql.includes('SENT_AT = NOW()') || cleanSql.includes('sent_at = now()')) {
+          updatePayload.sent_at = nowIso;
+          updatePayload.sentAt = nowIso;
+        }
         if (cleanSql.includes('revoked_at = NOW()') || upperSql.includes('REVOKED_AT = NOW()')) {
           updatePayload.revoked_at = nowIso;
           updatePayload.revokedAt = nowIso;
@@ -909,6 +1057,14 @@ function executeInMemoryQuery(sql: string, params: Record<string, any> = {}): an
   if (upperSql.includes('COUNT(*)')) {
     const table = targetTable;
     let list = memoryDb.tables[table] || [];
+    if (table === 'notifications') {
+      const uid = params.user_id || params.userId;
+      if (uid) list = list.filter((r) => r.user_id === uid || r.userId === uid);
+      if (cleanSql.includes('read_at IS NULL') || upperSql.includes('READ_AT IS NULL')) {
+        list = list.filter((r) => !r.read_at && !r.readAt);
+      }
+      return [[{ total: list.length, count: list.length }]];
+    }
     if (params.id) list = list.filter((r) => r.id === params.id);
     if (params.ministry_id || params.ministryId) {
       const mid = params.ministry_id || params.ministryId;
@@ -927,6 +1083,52 @@ function executeInMemoryQuery(sql: string, params: Record<string, any> = {}): an
   // --- 5. STANDARD SELECT ---
   const table = targetTable;
   let rows = memoryDb.tables[table] || [];
+
+  if (table === 'notifications') {
+    const uId = params.userId || params.user_id;
+    if (uId) {
+      rows = rows.filter((r) => r.user_id === uId || r.userId === uId);
+    }
+    if (cleanSql.includes('sent_at IS NULL') || upperSql.includes('SENT_AT IS NULL')) {
+      rows = rows.filter((r) => !r.sent_at && !r.sentAt);
+    }
+    // If a user has no notifications yet in memory, provide welcome notifications
+    if (rows.length === 0 && uId) {
+      const welcomeNotif = {
+        id: uuidv4(),
+        user_id: uId,
+        userId: uId,
+        type: 'welcome',
+        title: 'Welcome to TUMCU Portal',
+        body: 'Your Technical University of Mombasa Christian Union account is active. Explore ministries, fellowship meetings, and Sunday service attendance.',
+        channel: 'in_app',
+        read_at: null,
+        readAt: null,
+        sent_at: new Date().toISOString(),
+        sentAt: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+      };
+      memoryDb.tables.notifications.push(welcomeNotif);
+      rows = [welcomeNotif];
+    }
+    return [
+      rows.map((r) => ({
+        ...r,
+        id: r.id,
+        user_id: r.user_id || r.userId,
+        userId: r.user_id || r.userId,
+        type: r.type || 'welcome',
+        title: r.title || 'Welcome to TUMCU!',
+        body: r.body || '',
+        channel: r.channel || 'in_app',
+        read_at: r.read_at || r.readAt || null,
+        readAt: r.read_at || r.readAt || null,
+        sent_at: r.sent_at || r.sentAt || new Date().toISOString(),
+        sentAt: r.sent_at || r.sentAt || new Date().toISOString(),
+        created_at: r.created_at || r.createdAt || new Date().toISOString(),
+      })),
+    ];
+  }
 
   if (table === 'refresh_tokens') {
     const tHash = params.tokenHash || params.token_hash;

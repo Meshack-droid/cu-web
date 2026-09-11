@@ -17,8 +17,10 @@ import { AdminApplicationsPage } from '@/pages/AdminApplicationsPage';
 import { AdminRolesPage } from '@/pages/AdminRolesPage';
 import { AdminMinistriesPage } from '@/pages/AdminMinistriesPage';
 import { MinistryLeaderPortalPage } from '@/pages/MinistryLeaderPortalPage';
+import { PublicMembershipPage } from '@/pages/PublicMembershipPage';
 import { ElectionsPage } from '@/pages/ElectionsPage';
 import { SermonsResourcesPage } from '@/pages/SermonsResourcesPage';
+import { ConstitutionPage } from '@/pages/ConstitutionPage';
 import { FinancePage } from '@/pages/FinancePage';
 import { MeetingsPage } from '@/pages/MeetingsPage';
 import { AttendancePage } from '@/pages/AttendancePage';
@@ -38,6 +40,9 @@ export default function App() {
           <Route path="/ministries" element={<MinistriesPage />} />
           <Route path="/ministries/:id" element={<MinistryDetailsPage />} />
           <Route path="/events" element={<EventsPage />} />
+          <Route path="/membership" element={<PublicMembershipPage />} />
+          <Route path="/constitution" element={<ConstitutionPage />} />
+          <Route path="/resources" element={<SermonsResourcesPage />} />
           <Route path="/sermons" element={<SermonsResourcesPage />} />
           <Route path="/elections" element={<ElectionsPage />} />
           <Route path="/contact" element={<ContactPage />} />
@@ -57,6 +62,8 @@ export default function App() {
             <Route path="/dashboard/attendance" element={<AttendancePage />} />
             <Route path="/dashboard/ministry-portal" element={<MinistryLeaderPortalPage />} />
             <Route path="/dashboard/elections" element={<ElectionsPage />} />
+            <Route path="/dashboard/constitution" element={<ConstitutionPage />} />
+            <Route path="/dashboard/resources" element={<SermonsResourcesPage />} />
             <Route path="/dashboard/sermons" element={<SermonsResourcesPage />} />
             <Route path="/dashboard/prayer" element={<PrayerPage />} />
             <Route path="/dashboard/finance" element={<FinancePage />} />

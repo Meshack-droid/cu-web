@@ -24,6 +24,7 @@ interface AuthState {
   roles: AuthRole[];
   isAuthenticated: boolean;
   setSession: (accessToken: string, refreshToken: string, user: AuthUser) => void;
+  setUser: (user: AuthUser) => void;
   setTokens: (accessToken: string, refreshToken: string) => void;
   setPermissions: (permissions: string[]) => void;
   setRoles: (roles: AuthRole[]) => void;
@@ -42,6 +43,7 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       setSession: (accessToken, refreshToken, user) =>
         set({ accessToken, refreshToken, user, permissions: [], roles: [], isAuthenticated: true }),
+      setUser: (user) => set({ user }),
       setTokens: (accessToken, refreshToken) => set({ accessToken, refreshToken }),
       setPermissions: (permissions) => set({ permissions }),
       setRoles: (roles) => set({ roles }),
