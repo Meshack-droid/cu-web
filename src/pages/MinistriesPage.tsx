@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ArrowDown,
   ArrowUpRight,
@@ -19,7 +19,11 @@ import {
   Wrench,
 } from 'lucide-react';
 import { Card } from '@/components/Card';
-import { fetchMinistries, type Ministry } from '@/features/ministries/ministries.api';
+import {
+  fetchMinistries,
+  getMinistryBackground,
+  type Ministry,
+} from '@/features/ministries/ministries.api';
 import heroImage from '@/assets/hero.png';
 
 interface MinistryMeta {
@@ -49,7 +53,14 @@ const DIRECTORY: Ministry[] = [
   ['ushering', 'Ushering Ministry'], ['catering', 'Catering Ministry'], ['media', 'Media Ministry'], ['creative', 'Creative Ministry'],
   ['technicians', 'Technicians Ministry'], ['high_school', 'High School Ministry'], ['hospital', 'Hospital Ministry'],
   ['brothers', "Brothers' Ministry"], ['sisters', "Sisters' Ministry"],
-].map(([code, name], index) => ({ id: `min-${index + 1}`, code, name, description: null, created_at: '' }));
+].map(([code, name], index) => ({
+  id: `min-${index + 1}`,
+  code,
+  name,
+  description: null,
+  created_at: '',
+  image_url: getMinistryBackground({ id: `min-${index + 1}`, code }),
+}));
 
 function MinistryCardSkeleton() {
   return <Card variant="glass" className="overflow-hidden p-0 animate-pulse"><div className="h-52 bg-slate-200/70"/><div className="p-6"><div className="h-5 w-2/3 rounded bg-slate-200/70"/><div className="mt-3 h-3 w-full rounded bg-slate-100/80"/><div className="mt-2 h-3 w-5/6 rounded bg-slate-100/80"/></div></Card>;
@@ -58,8 +69,23 @@ function MinistryCardSkeleton() {
 export function MinistriesPage() {
   const [query, setQuery] = useState('');
   const [active, setActive] = useState('all');
+  const queryClient = useQueryClient();
+
   const { data, isLoading, isError } = useQuery({ queryKey: ['ministries'], queryFn: fetchMinistries });
   const ministries = data?.length ? data : DIRECTORY;
+
+  // Re-sync immediately when admin updates a ministry background in another component or tab
+  useEffect(() => {
+    const handleUpdate = () => {
+      queryClient.invalidateQueries({ queryKey: ['ministries'] });
+    };
+    window.addEventListener('tumcu_ministry_image_updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      window.removeEventListener('tumcu_ministry_image_updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, [queryClient]);
 
   const filtered = useMemo(() => ministries.filter((ministry) => {
     const text = `${ministry.name} ${ministry.code} ${ministry.description ?? ''}`.toLowerCase();
@@ -113,13 +139,25 @@ export function MinistriesPage() {
           const meta = MINISTRY_META[ministry.code] ?? { icon: Church, blurb: ministry.description || 'A place to serve, connect and grow.', accent: 'from-primary-900 to-primary-500', focus: 'Service & community' };
           const Icon = meta.icon;
           const reverse = index % 2 === 1;
+          const bgImg = ministry.image_url || getMinistryBackground(ministry) || heroImage;
+
           return <article key={ministry.id} className={`ministry-row group grid items-stretch overflow-hidden rounded-[32px] border border-white/70 bg-white/35 shadow-[0_25px_70px_rgba(6,44,23,.09)] backdrop-blur-xl lg:grid-cols-2 ${reverse ? 'lg:[&>div:first-child]:order-2' : ''}`}>
-            <div className="relative min-h-[300px] overflow-hidden">
-              <img src={heroImage} alt="" className={`absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105 ${index % 3 === 0 ? 'object-left' : index % 3 === 1 ? 'object-center' : 'object-right'}`}/>
-              <div className={`absolute inset-0 bg-gradient-to-br ${meta.accent} opacity-70 mix-blend-multiply transition duration-500 group-hover:opacity-55`}/>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/5 to-transparent"/>
-              <div className="absolute left-6 top-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/25 bg-white/15 text-white shadow-xl backdrop-blur-xl"><Icon size={25}/></div>
-              <div className="absolute bottom-6 left-6 right-6 text-white"><span className="text-xs font-black uppercase tracking-[.18em] text-white/75">{meta.focus}</span><h3 className="mt-1 text-3xl font-black">{ministry.name.replace(' Ministry', '')}</h3></div>
+            <div className="relative min-h-[300px] overflow-hidden bg-slate-900">
+              <img
+                src={bgImg}
+                alt={ministry.name}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = heroImage;
+                }}
+                className={`absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105 ${index % 3 === 0 ? 'object-left' : index % 3 === 1 ? 'object-center' : 'object-right'}`}
+              />
+              <div className={`absolute inset-0 bg-gradient-to-br ${meta.accent} opacity-40 mix-blend-multiply transition duration-500 group-hover:opacity-25`}/>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"/>
+              <div className="absolute left-6 top-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/25 bg-black/30 text-white shadow-xl backdrop-blur-md"><Icon size={25}/></div>
+              <div className="absolute bottom-6 left-6 right-6 text-white">
+                <span className="inline-block rounded-full bg-black/40 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[.18em] text-gold-300 backdrop-blur-sm">{meta.focus}</span>
+                <h3 className="mt-2 text-3xl font-black drop-shadow-sm">{ministry.name.replace(' Ministry', '')}</h3>
+              </div>
             </div>
             <div className="flex flex-col justify-center p-7 sm:p-10">
               <div className="flex items-center justify-between"><span className="rounded-full bg-primary-50 px-3 py-1 text-[11px] font-black uppercase tracking-wider text-primary-700">Ministry</span><ArrowUpRight className="text-slate-300 transition group-hover:text-primary-500"/></div>

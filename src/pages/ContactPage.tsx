@@ -23,8 +23,14 @@ export function ContactPage() {
             <div className="flex items-start gap-3">
               <Mail size={18} className="mt-0.5 shrink-0 text-primary-700" />
               <div>
-                <div className="text-sm font-medium text-primary-900">Email</div>
-                <div className="text-sm text-slate-600">tumcu@tum.ac.ke</div>
+                <div className="text-sm font-medium text-primary-900">Official Union Email</div>
+                <a
+                  href="mailto:tumcunion@gmail.com"
+                  className="text-sm font-bold text-primary-700 hover:text-primary-900 hover:underline transition"
+                >
+                  tumcunion@gmail.com
+                </a>
+                <div className="text-[11px] text-slate-500 mt-0.5">Direct inquiries & executive correspondence</div>
               </div>
             </div>
             <div className="flex items-start gap-3">

@@ -9,8 +9,8 @@ export const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const token = useAuthStore.getState().accessToken;
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  if (token && typeof token === 'string' && token !== 'null' && token !== 'undefined' && token.trim() !== '') {
+    config.headers.Authorization = `Bearer ${token.trim()}`;
   }
   return config;
 });
@@ -21,7 +21,7 @@ let refreshPromise: Promise<string> | null = null;
 
 async function refreshAccessToken(): Promise<string> {
   const refreshToken = useAuthStore.getState().refreshToken;
-  if (!refreshToken) {
+  if (!refreshToken || typeof refreshToken !== 'string' || refreshToken === 'null' || refreshToken === 'undefined' || !refreshToken.trim()) {
     useAuthStore.getState().logout();
     throw new Error('No refresh token available');
   }
@@ -29,7 +29,7 @@ async function refreshAccessToken(): Promise<string> {
   try {
     const { data } = await axios.post(
       `${api.defaults.baseURL}/auth/refresh`,
-      { refreshToken },
+      { refreshToken: refreshToken.trim() },
       { timeout: 20_000, headers: { 'Content-Type': 'application/json' } }
     );
 

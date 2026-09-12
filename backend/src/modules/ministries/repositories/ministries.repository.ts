@@ -24,5 +24,10 @@ export class MinistriesRepository extends BaseRepository<Ministries> {
     }
     return record;
   }
+
+  override async update(idOrCode: string, data: Partial<Ministries>): Promise<Ministries> {
+    const existing = await this.findByIdOrCode(idOrCode);
+    return super.update(existing.id, data);
+  }
 }
 

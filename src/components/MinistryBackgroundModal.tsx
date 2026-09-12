@@ -17,6 +17,7 @@ import {
   updateMinistry,
   MINISTRY_DEFAULT_PRESETS,
   getMinistryBackground,
+  setCachedMinistryBackground,
 } from '@/features/ministries/ministries.api';
 
 // Curated authentic Christian fellowship presets for one-click selection
@@ -190,8 +191,15 @@ export function MinistryBackgroundModal({
     setErrorMessage(null);
 
     try {
+      if (ministry.code) {
+        setCachedMinistryBackground(ministry.code, selectedImage);
+      }
+      setCachedMinistryBackground(ministry.id, selectedImage);
+
       await updateMinistry(ministry.id, {
         image_url: selectedImage,
+        code: ministry.code,
+        name: ministry.name,
       });
 
       if (onSaved) {

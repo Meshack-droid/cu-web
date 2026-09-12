@@ -10,6 +10,7 @@ import {
   ExternalLink,
   HelpCircle,
   ChevronDown,
+  Compass,
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
@@ -18,6 +19,8 @@ import { NotificationBell } from '@/components/NotificationBell';
 import tumcuLogo from '@/assets/tumcu-logo.png';
 import { logout as logoutApi } from '@/features/auth/auth.api';
 import { PortalGuideModal } from '@/components/PortalGuideModal';
+import { ViewAsRoleBanner } from '@/components/ViewAsRoleBanner';
+import { NavigationDirectoryModal } from '@/components/NavigationDirectoryModal';
 import { useQuery } from '@tanstack/react-query';
 import { fetchPendingApplications } from '@/features/membership/membership.api';
 
@@ -32,6 +35,7 @@ const coreNavItems = [
 
 export function DashboardLayout() {
   const [isGuideModalOpen, setIsGuideModalOpen] = useState(false);
+  const [isNavModalOpen, setIsNavModalOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -84,6 +88,9 @@ export function DashboardLayout() {
 
   return (
     <div className="min-h-screen bg-[#F7F9F7] text-[#17201B] flex flex-col">
+      {/* Simulation Banner when previewing as other roles */}
+      <ViewAsRoleBanner />
+
       {/* Top Desktop & Mobile Header Bar */}
       <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur-md transition-all shadow-xs">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
@@ -126,6 +133,16 @@ export function DashboardLayout() {
                   )}
                 </NavLink>
               ))}
+
+              {/* Comprehensive Directory Modal Button */}
+              <button
+                onClick={() => setIsNavModalOpen(true)}
+                className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold text-[#68736C] hover:bg-[#EAF5EF] hover:text-[#006633] transition"
+                title="Open Modules Directory"
+              >
+                <Compass size={15} className="text-[#68736C]" />
+                <span>Directory</span>
+              </button>
 
               {/* Super Admin Center Quick Pill */}
               {isSuperAdmin && (
@@ -356,6 +373,9 @@ export function DashboardLayout() {
 
       {/* Portal Guide Modal */}
       <PortalGuideModal isOpen={isGuideModalOpen} onClose={() => setIsGuideModalOpen(false)} />
+
+      {/* Navigation Directory Modal */}
+      <NavigationDirectoryModal isOpen={isNavModalOpen} onClose={() => setIsNavModalOpen(false)} />
     </div>
   );
 }

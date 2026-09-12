@@ -37,6 +37,8 @@ export interface PendingApplication {
   email: string;
   admission_number: string | null;
   membership_type_name: string;
+  phone?: string | null;
+  year_of_study?: string | number | null;
 }
 
 export async function fetchPendingApplications() {

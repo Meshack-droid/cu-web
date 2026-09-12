@@ -29,6 +29,12 @@ export const MINISTRY_DEFAULT_PRESETS: Record<string, string> = {
 
 const DEFAULT_FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1200&q=80';
 
+/** Normalize code string for robust matching across min_*, min-*, etc. */
+function normalizeMinistryCode(code?: string | null): string {
+  if (!code) return '';
+  return code.toLowerCase().replace(/^(min[-_]|ministry[-_])/, '').trim();
+}
+
 /** Gets the resolved background image for a ministry with local override fallback */
 export function getMinistryBackground(ministry: { id?: string; code?: string; image_url?: string | null }): string {
   try {
@@ -37,6 +43,15 @@ export function getMinistryBackground(ministry: { id?: string; code?: string; im
       const savedMap = JSON.parse(rawSaved);
       if (ministry.id && savedMap[ministry.id]) return savedMap[ministry.id];
       if (ministry.code && savedMap[ministry.code]) return savedMap[ministry.code];
+      const normCode = normalizeMinistryCode(ministry.code);
+      if (normCode && savedMap[normCode]) return savedMap[normCode];
+
+      // Fuzzy check against saved keys
+      for (const [key, val] of Object.entries(savedMap)) {
+        if (normCode && (normCode.includes(key) || key.includes(normCode))) {
+          return val as string;
+        }
+      }
     }
   } catch {
     // Ignore storage parse error
@@ -47,20 +62,34 @@ export function getMinistryBackground(ministry: { id?: string; code?: string; im
   }
 
   const codeKey = (ministry.code || '').toLowerCase();
+  const normKey = normalizeMinistryCode(ministry.code);
   for (const [key, url] of Object.entries(MINISTRY_DEFAULT_PRESETS)) {
-    if (codeKey.includes(key)) return url;
+    if (codeKey.includes(key) || normKey.includes(key)) return url;
   }
 
   return DEFAULT_FALLBACK_IMAGE;
 }
 
-/** Save local cache of ministry background images */
+/** Save local cache of ministry background images and broadcast update */
 export function setCachedMinistryBackground(idOrCode: string, imageUrl: string) {
   try {
     const rawSaved = localStorage.getItem('tumcu_ministry_images');
     const map = rawSaved ? JSON.parse(rawSaved) : {};
     map[idOrCode] = imageUrl;
+    const norm = normalizeMinistryCode(idOrCode);
+    if (norm) {
+      map[norm] = imageUrl;
+    }
     localStorage.setItem('tumcu_ministry_images', JSON.stringify(map));
+    
+    // Broadcast event across components in real time
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('tumcu_ministry_image_updated', {
+          detail: { idOrCode, imageUrl, timestamp: Date.now() },
+        })
+      );
+    }
   } catch {
     // Ignore
   }
@@ -68,12 +97,16 @@ export function setCachedMinistryBackground(idOrCode: string, imageUrl: string) 
 
 /** Public endpoint — no auth required, ministries are public info on the site. */
 export async function fetchMinistries() {
-  const { data } = await api.get<ApiResponse<Ministry[]>>('/ministries');
-  const list = Array.isArray(data.data) ? data.data : [];
-  return list.map((m) => ({
-    ...m,
-    image_url: getMinistryBackground(m),
-  }));
+  try {
+    const { data } = await api.get<ApiResponse<Ministry[]>>('/ministries');
+    const list = Array.isArray(data.data) ? data.data : [];
+    return list.map((m) => ({
+      ...m,
+      image_url: getMinistryBackground(m),
+    }));
+  } catch {
+    return [];
+  }
 }
 
 /** Update ministry details or background picture (Super Admin / Authorized) */
@@ -84,10 +117,16 @@ export async function updateMinistry(id: string, payload: Partial<Ministry>) {
   }
   try {
     const { data } = await api.put<ApiResponse<Ministry>>(`/ministries/${id}`, payload);
-    return data.data;
+    const updated = data.data;
+    if (updated) {
+      updated.image_url = getMinistryBackground(updated);
+    }
+    return updated;
   } catch (err) {
     // If backend endpoint is purely in-memory, still return updated local object
-    return { id, ...payload } as Ministry;
+    const fallbackObj = { id, ...payload } as Ministry;
+    fallbackObj.image_url = getMinistryBackground(fallbackObj);
+    return fallbackObj;
   }
 }
 
@@ -107,6 +146,9 @@ export interface MinistryDetails {
 
 export async function fetchMinistryDetails(id: string) {
   const { data } = await api.get<ApiResponse<MinistryDetails>>(`/ministries/${id}/details`);
+  if (data.data?.ministry) {
+    data.data.ministry.image_url = getMinistryBackground(data.data.ministry);
+  }
   return data.data;
 }
 

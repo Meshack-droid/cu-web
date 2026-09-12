@@ -21,15 +21,21 @@ interface LeaderAppointmentModalProps {
   isOpen: boolean;
   onClose: () => void;
   defaultPositionId?: string;
+  selectedPositionId?: string;
+  leadershipPositions?: LeadershipPosition[];
 }
 
 export function LeaderAppointmentModal({
   isOpen,
   onClose,
   defaultPositionId,
+  selectedPositionId: incomingSelectedPosId,
+  leadershipPositions: initialPositions,
 }: LeaderAppointmentModalProps) {
   const queryClient = useQueryClient();
-  const [selectedPositionId, setSelectedPositionId] = useState(defaultPositionId || '');
+  const [selectedPositionId, setSelectedPositionId] = useState(
+    incomingSelectedPosId || defaultPositionId || ''
+  );
   const [assignmentType, setAssignmentType] = useState<'permanent' | 'acting' | 'co-opted' | 'temporary'>('permanent');
   const [academicYear, setAcademicYear] = useState('2025/2026');
   const [notes, setNotes] = useState('');

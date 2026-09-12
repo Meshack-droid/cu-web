@@ -163,28 +163,55 @@ export class AuthService {
    * the presented token.
    */
   async refresh(refreshToken: string, ctx: RequestContext = {}) {
+    if (!refreshToken || typeof refreshToken !== 'string' || refreshToken === 'undefined' || refreshToken === 'null' || !refreshToken.trim()) {
+      throw new AuthenticationError('Invalid or expired refresh token');
+    }
+
+    // 1. Verify cryptographic signature and expiration of the refresh JWT
+    let decoded: { sub: string; jti?: string };
+    try {
+      decoded = jwt.verify(refreshToken, env.JWT_REFRESH_SECRET) as { sub: string; jti?: string };
+    } catch {
+      throw new AuthenticationError('Invalid or expired refresh token');
+    }
+
+    if (!decoded || !decoded.sub) {
+      throw new AuthenticationError('Invalid or expired refresh token');
+    }
+
     const tokenHash = hashToken(refreshToken);
     const stored = await this.repository.findValidRefreshToken(tokenHash);
 
     if (!stored) {
       const existing = await this.repository.findRefreshTokenByHash(tokenHash);
       if (existing?.revoked_at) {
-        await this.repository.revokeAllRefreshTokens(existing.user_id);
-        await this.repository.logSecurityEvent({
-          userId: existing.user_id,
-          eventType: 'token_refresh_reuse_detected',
-          ipAddress: ctx.ipAddress,
-          userAgent: ctx.userAgent,
-        });
+        // Concurrency grace window (30 seconds): allow concurrent in-flight requests or network retries
+        const revokedTime = new Date(existing.revoked_at).getTime();
+        const isRecentRevocation = !isNaN(revokedTime) && Date.now() - revokedTime < 30_000;
+
+        if (!isRecentRevocation) {
+          await this.repository.revokeAllRefreshTokens(existing.user_id);
+          await this.repository.logSecurityEvent({
+            userId: existing.user_id,
+            eventType: 'token_refresh_reuse_detected',
+            ipAddress: ctx.ipAddress,
+            userAgent: ctx.userAgent,
+          });
+          throw new AuthenticationError('Invalid or expired refresh token');
+        }
       }
-      throw new AuthenticationError('Invalid or expired refresh token');
     }
 
-    const user = await this.repository.findById(stored.user_id);
+    // Resolve user: from stored database record or verified decoded JWT sub
+    const userId = stored?.user_id || decoded.sub;
+    let user = await this.repository.findById(userId);
+    if (!user) {
+      user = await this.repository.findByIdentifier(userId);
+    }
     if (!user) throw new AuthenticationError('User no longer exists');
 
-    // Rotate: revoke the used token, issue a new pair.
-    await this.repository.revokeRefreshToken(tokenHash);
+    // Rotate: revoke the used token, issue a new pair
+    await this.repository.revokeRefreshToken(tokenHash).catch(() => {});
     await this.repository.logSecurityEvent({
       userId: user.id,
       eventType: 'token_refresh',

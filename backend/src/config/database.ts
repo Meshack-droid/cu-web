@@ -1923,6 +1923,8 @@ function executeInMemoryQuery(sql: string, params: Record<string, any> = {}): an
 
       if (params.id && records[i].id === params.id) {
         matches = true;
+      } else if (table === 'ministries' && params.id && records[i].code === params.id) {
+        matches = true;
       } else if (params.applicationId && records[i].id === params.applicationId) {
         matches = true;
       } else if (params.registrationId && records[i].id === params.registrationId) {
@@ -2155,6 +2157,8 @@ function executeInMemoryQuery(sql: string, params: Record<string, any> = {}): an
   if (params.id) {
     if (table === 'ministries' || table === 'committees') {
       rows = rows.filter((r) => r.id === params.id || r.code === params.id || (r.code && r.code.toLowerCase() === String(params.id).toLowerCase()));
+    } else if (table === 'users') {
+      rows = rows.filter((r) => r.id === params.id || r.email === params.id || r.username === params.id);
     } else {
       rows = rows.filter((r) => r.id === params.id);
     }

@@ -18,6 +18,11 @@ export function RequireAuth() {
       setChecking(false);
       return;
     }
+
+    const timer = setTimeout(() => {
+      if (mounted) setChecking(false);
+    }, 6000);
+
     fetchCurrentSession()
       .then((session) => {
         if (!mounted) return;
@@ -30,8 +35,15 @@ export function RequireAuth() {
       .catch(() => {
         if (mounted) logout();
       })
-      .finally(() => mounted && setChecking(false));
-    return () => { mounted = false; };
+      .finally(() => {
+        clearTimeout(timer);
+        if (mounted) setChecking(false);
+      });
+
+    return () => {
+      mounted = false;
+      clearTimeout(timer);
+    };
   }, [accessToken, isAuthenticated, logout, setPermissions, setRoles, setUser]);
 
   if (checking) return <div className="grid min-h-screen place-items-center bg-[#f4f7f5]"><div className="rounded-2xl border border-white/70 bg-white/70 px-5 py-3 text-sm font-semibold text-primary-800 shadow-xl backdrop-blur-xl">Securing your session…</div></div>;

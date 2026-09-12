@@ -28,12 +28,19 @@ import { type AttendanceSession } from '@/features/attendance/attendance.api';
 import { useDashboardStore } from '@/store/dashboard.store';
 
 interface SundayServiceQrModalProps {
+  isOpen?: boolean;
   session?: AttendanceSession;
   onClose: () => void;
   onSessionUpdated?: (updated: AttendanceSession) => void;
 }
 
-export function SundayServiceQrModal({ session: initialSession, onClose, onSessionUpdated }: SundayServiceQrModalProps) {
+export function SundayServiceQrModal({
+  isOpen,
+  session: initialSession,
+  onClose,
+  onSessionUpdated,
+}: SundayServiceQrModalProps) {
+  if (isOpen === false) return null;
   const addAuditLog = useDashboardStore((s) => s.addAuditLog);
 
   // Fallback default Sunday service session if none passed

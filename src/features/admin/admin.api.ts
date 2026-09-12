@@ -6,6 +6,8 @@ export interface AdminUser {
   email: string;
   admission_number: string | null;
   account_status: string;
+  phone?: string | null;
+  year_of_study?: string | number | null;
 }
 
 export interface RoleOption {

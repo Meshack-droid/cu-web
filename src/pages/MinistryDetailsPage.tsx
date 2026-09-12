@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'motion/react';
@@ -7,7 +7,13 @@ import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { useAuthStore } from '@/store/auth.store';
 import { fetchMyMembershipStatus } from '@/features/membership/membership.api';
-import { fetchMinistryDetails, fetchMyMinistryMembership, joinMinistry, leaveMinistry } from '@/features/ministries/ministries.api';
+import {
+  fetchMinistryDetails,
+  fetchMyMinistryMembership,
+  getMinistryBackground,
+  joinMinistry,
+  leaveMinistry,
+} from '@/features/ministries/ministries.api';
 
 const FALLBACK: Record<string, { focus: string; blurb: string }> = {
   intercessory: { focus: 'Prayer & spiritual growth', blurb: 'A place to pray, intercede and strengthen the spiritual life of the Union.' },
@@ -35,6 +41,19 @@ export function MinistryDetailsPage() {
   });
 
   const resolvedMinistryId = data?.ministry?.id || id;
+
+  // Listen for admin background updates to update this view immediately
+  useEffect(() => {
+    const handleUpdate = () => {
+      queryClient.invalidateQueries({ queryKey: ['ministry', id] });
+    };
+    window.addEventListener('tumcu_ministry_image_updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      window.removeEventListener('tumcu_ministry_image_updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, [queryClient, id]);
 
   const { data: ministryMembership } = useQuery({
     queryKey: ['ministry-membership', resolvedMinistryId],
@@ -68,6 +87,7 @@ export function MinistryDetailsPage() {
   const { ministry, stats, trainings } = data;
   const fallback = FALLBACK[ministry.code] ?? { focus: 'Service & community', blurb: 'A place to serve, connect and grow in Christ-centred community.' };
   const isLeader = ministryMembership?.position === 'leader' || ministryMembership?.position === 'deputy_leader';
+  const bgImage = ministry.image_url || getMinistryBackground(ministry);
 
   const connectionContent = !isAuthenticated ? (
     <>
@@ -89,25 +109,41 @@ export function MinistryDetailsPage() {
   );
 
   return <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="overflow-hidden">
-    <section className="mesh-hero-bg px-5 pb-16 pt-8 sm:px-6 lg:pb-20 lg:pt-12">
-      <div className="page-shell">
-        <div className="flex flex-wrap items-center gap-3 text-sm font-bold text-primary-700">
-          <Link to="/" className="inline-flex items-center gap-1.5 hover:text-primary-900 transition"><Home size={15}/> Home</Link>
-          <span className="text-slate-300 font-normal">/</span>
-          <Link to="/ministries" className="inline-flex items-center gap-1 hover:text-primary-900 transition">All ministries</Link>
+    <section className="relative overflow-hidden px-5 pb-16 pt-8 sm:px-6 lg:pb-20 lg:pt-12 bg-slate-950 text-white">
+      {/* Dynamic Ministry Background with overlay */}
+      <img
+        src={bgImage}
+        alt={ministry.name}
+        className="absolute inset-0 h-full w-full object-cover opacity-35 object-center"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/90" />
+
+      <div className="page-shell relative z-10">
+        <div className="flex flex-wrap items-center gap-3 text-sm font-bold text-slate-300">
+          <Link to="/" className="inline-flex items-center gap-1.5 hover:text-white transition"><Home size={15}/> Home</Link>
+          <span className="text-slate-600 font-normal">/</span>
+          <Link to="/ministries" className="inline-flex items-center gap-1 hover:text-white transition">All ministries</Link>
+          <span className="text-slate-600 font-normal">/</span>
+          <span className="text-gold-400">{ministry.name}</span>
         </div>
         <div className="mt-8 grid gap-8 lg:grid-cols-[1.2fr_.8fr] lg:items-end">
           <div>
-            <span className="eyebrow"><Sparkles size={14}/> {fallback.focus}</span>
-            <h1 className="mt-5 text-4xl font-black tracking-tight text-primary-950 sm:text-6xl">{ministry.name}</h1>
-            <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600">{ministry.description || fallback.blurb}</p>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-gold-500/20 border border-gold-500/30 px-3 py-1 text-xs font-black uppercase tracking-wider text-gold-300">
+              <Sparkles size={14}/> {fallback.focus}
+            </span>
+            <h1 className="mt-5 text-4xl font-black tracking-tight text-white sm:text-6xl drop-shadow-sm">{ministry.name}</h1>
+            <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-200">{ministry.description || fallback.blurb}</p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <div className="surface-glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-primary-800"><Users size={16}/> {stats.activeMembers} active member{stats.activeMembers === 1 ? '' : 's'}</div>
-              <div className="surface-glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-primary-800"><Church size={16}/> TUMCU ministry</div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-bold text-white backdrop-blur-md">
+                <Users size={16} className="text-gold-400"/> {stats.activeMembers} active member{stats.activeMembers === 1 ? '' : 's'}
+              </div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-bold text-white backdrop-blur-md">
+                <Church size={16} className="text-gold-400"/> TUMCU ministry
+              </div>
             </div>
           </div>
-          <Card variant="glass" className="p-6">
-            <p className="text-xs font-black uppercase tracking-[.18em] text-gold-600">Your connection</p>
+          <Card variant="glass" className="p-6 bg-white/95 text-slate-900 border-white/40 shadow-2xl backdrop-blur-xl">
+            <p className="text-xs font-black uppercase tracking-[.18em] text-gold-700">Your connection</p>
             {connectionContent}
           </Card>
         </div>

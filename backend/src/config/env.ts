@@ -19,7 +19,7 @@ const envSchema = z.object({
 
   JWT_ACCESS_SECRET: z.string().default('tumcu-tecump-jwt-access-secret-32-chars-long-secure-key'),
   JWT_REFRESH_SECRET: z.string().default('tumcu-tecump-jwt-refresh-secret-32-chars-long-secure-key'),
-  JWT_ACCESS_EXPIRES_IN: z.string().default('15m'),
+  JWT_ACCESS_EXPIRES_IN: z.string().default('24h'),
   JWT_REFRESH_EXPIRES_IN: z.string().default('30d'),
 
   CORS_ORIGIN: z.string().default('http://localhost:3000,http://localhost:5173,*'),
